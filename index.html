@@ -13,7 +13,7 @@
 <link rel="apple-touch-icon" href="icon.png">
 <style>
 :root{
-  --paper:#E9E8E3; --panel:#FBFBF9; --ink:#1E2022; --ink2:#5A5D60; --line:#CFCFC8;
+  --paper:#E9E8E3; --panel:#FBFBF9; --ink:#1E2022; --ink2:#5A5D60; --line:#CFCFC8; --soft:#F1F1ED;
   --vater:#24506E; --eigen:#5E6E2A; --alarm:#B4342A; --ok:#3E7A4F; --tap:56px;
 }
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
@@ -23,118 +23,128 @@ button,input,textarea,select{font:inherit;color:inherit}
 button{background:none;border:0;cursor:pointer}
 input,textarea,select{width:100%;background:var(--panel);border:1.5px solid var(--line);border-radius:8px;padding:12px 14px;min-height:52px;outline:none}
 input:focus,textarea:focus,select:focus{border-color:var(--ink)}
-textarea{resize:none;min-height:76px}
+textarea{resize:none;min-height:70px}
 select{appearance:none;-webkit-appearance:none}
 h1{font-size:30px;font-weight:800;letter-spacing:-.02em;line-height:1.05}
-h2{font-size:20px;font-weight:700;margin:26px 0 10px}
-.muted{color:var(--ink2)}
-.small{font-size:14px}
+h2{font-size:20px;font-weight:700;margin:26px 0 10px;display:flex;justify-content:space-between;align-items:baseline}
+h2 .count{font-size:15px;font-weight:600;color:var(--ink2)}
+.muted{color:var(--ink2)}.small{font-size:14px}
 .view{display:none;padding:18px 16px 0;max-width:560px;margin:0 auto}
 .view.on{display:block}
 .head{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;padding-top:env(safe-area-inset-top)}
-.pill{display:inline-flex;align-items:center;gap:6px;border:1.5px solid var(--ink);border-radius:999px;padding:8px 14px;font-weight:600;min-height:40px}
+.pill{display:inline-flex;align-items:center;gap:6px;border:1.5px solid var(--ink);border-radius:999px;padding:8px 14px;font-weight:600;min-height:40px;white-space:nowrap}
 .pill.alarm{border-color:var(--alarm);color:var(--alarm)}
-/* Laufzettel: panel with coloured spine encoding the Bereich */
 .zettel{background:var(--panel);border:1.5px solid var(--line);border-left-width:8px;border-radius:6px;padding:12px 14px;margin-bottom:10px;position:relative}
-.zettel.vater{border-left-color:var(--vater)}
-.zettel.eigen{border-left-color:var(--eigen)}
-.zettel.done{opacity:.55}
-.zettel.done .t{text-decoration:line-through}
+.zettel.vater{border-left-color:var(--vater)}.zettel.eigen{border-left-color:var(--eigen)}
+.zettel.done{opacity:.55}.zettel.done>.row .t{text-decoration:line-through}
+.zettel.haupt{border-width:2.5px;border-color:var(--ink);border-left-width:8px}
+.zettel.haupt.vater{border-left-color:var(--vater)}.zettel.haupt.eigen{border-left-color:var(--eigen)}
 .row{display:flex;align-items:center;gap:12px}
 .grow{flex:1;min-width:0}
 .t{font-weight:600;word-break:break-word}
+.t.big{font-size:21px;line-height:1.2}
 .chk{width:34px;height:34px;flex:none;border:2px solid var(--ink);border-radius:8px;display:grid;place-items:center;font-size:20px;line-height:1}
 .chk.on{background:var(--ink);color:var(--panel)}
-.tag{font-size:13px;font-weight:600;padding:2px 8px;border-radius:4px;color:#fff;display:inline-block}
+.chk.sm{width:28px;height:28px;font-size:16px;border-radius:6px}
+.tag{font-size:13px;font-weight:600;padding:2px 8px;border-radius:4px;color:#fff;display:inline-block;vertical-align:middle}
 .tag.vater{background:var(--vater)}.tag.eigen{background:var(--eigen)}
-.due{font-size:14px;font-weight:600}
-.due.over{color:var(--alarm)}.due.today{color:var(--ok)}
+.due{font-size:14px;font-weight:600}.due.over{color:var(--alarm)}.due.today{color:var(--ok)}
 .btn{min-height:var(--tap);border-radius:10px;padding:0 18px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;gap:8px;width:100%;border:2px solid var(--ink)}
 .btn.solid{background:var(--ink);color:var(--paper)}
 .btn.sm{min-height:44px;width:auto;padding:0 14px;font-size:15px;border-width:1.5px}
 .btn.ghost{border-color:var(--line);color:var(--ink2)}
 .btn.warn{border-color:var(--alarm);color:var(--alarm)}
+.link{color:var(--ink2);font-weight:600;font-size:15px;min-height:40px;display:inline-flex;align-items:center;text-decoration:underline;text-underline-offset:3px}
 .seg{display:flex;border:2px solid var(--ink);border-radius:10px;overflow:hidden}
 .seg button{flex:1;min-height:48px;font-weight:700}
-.seg button.on.vater{background:var(--vater);color:#fff}
-.seg button.on.eigen{background:var(--eigen);color:#fff}
+.seg button.on{background:var(--ink);color:#fff}
+.seg button.on.vater{background:var(--vater)}.seg button.on.eigen{background:var(--eigen)}
 .stack>*+*{margin-top:10px}
-.haupt{border:2.5px solid var(--ink);border-radius:10px;padding:14px;background:var(--panel)}
-.haupt .lbl{font-weight:800;font-size:15px;margin-bottom:8px}
-.haupt textarea{border:0;padding:0;min-height:60px;font-size:22px;font-weight:700;line-height:1.2;background:transparent}
-.neben textarea{min-height:52px;font-size:17px}
-.empty{padding:18px 4px;color:var(--ink2)}
-.fb{background:var(--panel);border:1.5px solid var(--line);border-radius:10px;padding:14px}
-.fb.now{border:2.5px solid var(--ink)}
-.fb label{display:block;font-weight:700;margin:10px 0 6px}
+.form{background:var(--panel);border:1.5px solid var(--line);border-radius:10px;padding:14px}
+.form label{display:block;font-weight:700;margin:14px 0 6px}.form label:first-child{margin-top:0}
+.form.now{border:2.5px solid var(--ink)}
+.empty{padding:14px 4px;color:var(--ink2)}
+.hint{border:1.5px dashed var(--line);border-radius:8px;padding:12px 14px;color:var(--ink2);font-size:15px}
+.notice{background:var(--ink);color:var(--paper);padding:12px 14px;border-radius:8px;font-weight:600;margin-bottom:12px}
 .tabs{position:fixed;left:0;right:0;bottom:0;background:var(--panel);border-top:1.5px solid var(--line);display:flex;padding-bottom:env(safe-area-inset-bottom);z-index:5}
-.tabs button{flex:1;min-height:64px;font-size:13px;font-weight:600;color:var(--ink2);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px}
-.tabs button.on{color:var(--ink)}
-.tabs button .ico{font-size:22px;line-height:1}
+.tabs button{flex:1;min-height:64px;font-size:12px;font-weight:600;color:var(--ink2);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px}
+.tabs button.on{color:var(--ink)}.tabs button .ico{font-size:22px;line-height:1}
 .fab{position:fixed;right:16px;bottom:calc(84px + env(safe-area-inset-bottom));width:64px;height:64px;border-radius:50%;background:var(--ink);color:var(--paper);font-size:34px;font-weight:300;display:grid;place-items:center;box-shadow:0 6px 18px rgba(0,0,0,.25);z-index:6}
-.sheet-bg{position:fixed;inset:0;background:rgba(30,32,34,.45);display:none;z-index:10}
-.sheet-bg.on{display:block}
+.sheet-bg{position:fixed;inset:0;background:rgba(30,32,34,.45);display:none;z-index:10}.sheet-bg.on{display:block}
 .sheet{position:fixed;left:0;right:0;bottom:0;background:var(--paper);border-radius:18px 18px 0 0;padding:16px 16px calc(20px + env(safe-area-inset-bottom));max-height:88vh;overflow:auto;z-index:11;transform:translateY(100%);transition:transform .22s ease}
 .sheet.on{transform:none}
 @media (prefers-reduced-motion:reduce){.sheet{transition:none}}
 .sheet h3{font-size:22px;font-weight:800;margin-bottom:14px}
 .bar{height:14px;border-radius:7px;background:var(--line);overflow:hidden;display:flex;margin:8px 0}
-.bar i{display:block;height:100%}
-.bar .v{background:var(--vater)}.bar .e{background:var(--eigen)}
-.kv{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--line)}
-.kv:last-child{border:0}
-.count{font-size:15px;font-weight:700;color:var(--ink2)}
-.count.full{color:var(--alarm)}
+.bar i{display:block;height:100%}.bar .v{background:var(--vater)}.bar .e{background:var(--eigen)}
+.kv{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--line)}.kv:last-child{border:0}
 details summary{list-style:none;cursor:pointer;font-weight:700;padding:14px 0;color:var(--ink2)}
 details summary::-webkit-details-marker{display:none}
-.hint{border:1.5px dashed var(--line);border-radius:8px;padding:12px 14px;color:var(--ink2);font-size:15px}
-.inline{display:flex;gap:8px;flex-wrap:wrap}
-.inline .btn{width:auto}
-.notice{background:var(--ink);color:var(--paper);padding:12px 14px;border-radius:8px;font-weight:600;margin-bottom:12px}
+.inline{display:flex;gap:8px;flex-wrap:wrap;align-items:center}.inline .btn{width:auto}
 .x{position:absolute;top:8px;right:8px;width:36px;height:36px;color:var(--ink2);font-size:22px}
+.steps{margin-top:12px;border-top:1px solid var(--line);padding-top:8px}
+.step{display:flex;align-items:flex-start;gap:10px;padding:8px 0;border-bottom:1px solid var(--soft)}
+.step:last-child{border:0}.step.done{color:var(--ink2)}.step.done .st>span.tx{text-decoration:line-through}
+.step .st{flex:1;word-break:break-word;padding-top:3px}
+.step .del{color:var(--ink2);width:32px;height:28px;font-size:18px;flex:none}
+.addstep{display:flex;gap:8px;margin-top:8px}.addstep input{min-height:48px}.addstep button{flex:none}
+.prev{color:var(--ink2);font-size:15px;margin-top:4px}
+.prev b{color:var(--ink)}
+.open-h{cursor:pointer}
+.arrow{color:var(--ink2);font-size:14px;transition:transform .15s}.arrow.on{transform:rotate(90deg)}
+.day{background:var(--panel);border:1.5px solid var(--line);border-radius:8px;padding:12px 14px;margin-bottom:10px}
+.day .dh{font-weight:800;display:flex;justify-content:space-between}
+.day ul{list-style:none;margin-top:6px}.day li{padding:3px 0}.day li.d::before{content:"✓ ";color:var(--ok)}.day li.o::before{content:"○ ";color:var(--ink2)}
+.day .q{margin-top:6px;font-size:15px;color:var(--ink2)}
+.hit{background:var(--panel);border:1.5px solid var(--line);border-radius:8px;padding:10px 14px;margin-bottom:8px}
+.hit .kind{font-size:13px;font-weight:700;color:var(--ink2)}
+.monat{font-weight:800;color:var(--ink2);margin:18px 0 8px;font-size:15px}
+mark{background:#F2E38A;color:inherit;border-radius:2px}
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:10px;align-items:start}
+.colh{font-weight:800;font-size:15px;padding:6px 0 8px;border-bottom:3px solid;margin-bottom:8px}
+.colh.vater{border-color:var(--vater);color:var(--vater)}.colh.eigen{border-color:var(--eigen);color:var(--eigen)}
+.cols .zettel{padding:10px 10px 10px 10px;border-left-width:6px;font-size:15px}
+.cols .zettel .row{gap:8px}.cols .chk{width:28px;height:28px;font-size:16px;border-radius:6px}
+.cols .t{hyphens:auto;-webkit-hyphens:auto}.cols .t.big{font-size:17px}.cols .due{font-size:13px}.cols .prev{font-size:13px}.cols .arrow{display:none}
+.cols .empty{font-size:14px;padding:8px 2px}
+.pk{display:flex;align-items:center;justify-content:space-between;gap:10px;background:var(--panel);border:1.5px solid var(--line);border-radius:8px;padding:10px 14px;margin-top:12px}
+.pk.ja{border-color:var(--ink);border-width:2px}.pk.nein{opacity:.6}
 </style>
 </head>
 <body>
 
-<!-- HEUTE -->
 <section class="view on" id="v-heute">
   <div class="head">
     <div><div class="muted small" id="h-wtag"></div><h1 id="h-datum"></h1></div>
     <button class="pill" id="h-eingang" onclick="openEingang()">Eingang · 0</button>
   </div>
-
+  <div id="h-pakete"></div>
   <h2>Aufträge</h2>
   <div id="h-auftraege"></div>
-
-  <h2>Hauptaufgabe</h2>
-  <div class="haupt" id="h-haupt"></div>
-
-  <h2>Nebenaufgaben</h2>
-  <div class="stack neben" id="h-neben"></div>
-
+  <h2>Tagesplan</h2>
+  <div id="h-plan"></div>
   <h2>Feierabend</h2>
-  <div class="fb" id="h-fb"></div>
+  <div id="h-fb"></div>
   <div style="height:24px"></div>
 </section>
 
-<!-- PROJEKTE -->
 <section class="view" id="v-projekte">
-  <div class="head"><h1>Projekte</h1><span class="count" id="p-count"></span></div>
+  <div class="head"><h1>Projekte</h1><span class="pill" id="p-count"></span></div>
+  <div style="height:14px"></div>
   <div id="p-aktiv"></div>
-  <button class="btn" onclick="openProjektNeu()">Neues Projekt</button>
+  <button class="btn" onclick="openProjektForm()">Neues Projekt</button>
   <details><summary>Eisfach anzeigen</summary><div id="p-eis"></div></details>
-  <details><summary>Abgeschlossen</summary><div id="p-fertig"></div></details>
+  <details><summary>Abgeschlossene anzeigen</summary><div id="p-fertig"></div></details>
 </section>
 
-<!-- AUFTRÄGE -->
 <section class="view" id="v-auftraege">
   <div class="head"><h1>Aufträge</h1></div>
+  <div style="height:14px"></div>
   <div id="a-offen"></div>
-  <button class="btn" onclick="openAuftragNeu()">Neuer Auftrag</button>
+  <button class="btn" onclick="openAuftragForm()">Neuer Auftrag</button>
   <details><summary>Erledigte anzeigen</summary><div id="a-fertig"></div></details>
 </section>
 
-<!-- WOCHE -->
 <section class="view" id="v-woche">
   <div class="head"><h1 id="w-kw">Woche</h1></div>
   <h2>Nächster Schritt je Projekt</h2>
@@ -142,7 +152,7 @@ details summary::-webkit-details-marker{display:none}
   <h2>Termine diese Woche</h2>
   <div id="w-termine"></div>
   <h2>Letzte 14 Tage</h2>
-  <div class="fb" id="w-stats"></div>
+  <div class="form" id="w-stats"></div>
   <h2>Daten</h2>
   <div class="inline">
     <button class="btn sm" onclick="exportJson()">Sicherung speichern</button>
@@ -151,224 +161,289 @@ details summary::-webkit-details-marker{display:none}
   <p class="muted small" style="margin-top:10px">Die Daten liegen nur auf diesem Gerät. Einmal die Woche sichern.</p>
 </section>
 
+<section class="view" id="v-archiv">
+  <div class="head"><h1>Archiv</h1></div>
+  <div style="margin-top:14px"><input id="s-q" type="search" placeholder="Suchen: Aufgabe, Projekt, Auftrag, Idee…" oninput="renderArchiv()"></div>
+  <div id="s-out"></div>
+</section>
+
 <nav class="tabs">
   <button class="on" data-v="heute" onclick="show('heute')"><span class="ico">▣</span>Heute</button>
   <button data-v="projekte" onclick="show('projekte')"><span class="ico">◆</span>Projekte</button>
   <button data-v="auftraege" onclick="show('auftraege')"><span class="ico">≡</span>Aufträge</button>
   <button data-v="woche" onclick="show('woche')"><span class="ico">▦</span>Woche</button>
+  <button data-v="archiv" onclick="show('archiv')"><span class="ico">⌕</span>Archiv</button>
 </nav>
 <button class="fab" onclick="openQuick()" aria-label="Schnell erfassen">+</button>
-
 <div class="sheet-bg" id="sheet-bg" onclick="closeSheet()"></div>
 <div class="sheet" id="sheet"></div>
 
 <script>
-/* ---------- Daten ---------- */
-const KEY='tagwerk-v1';
-const MAX_AKTIV=3;
-let S=load();
-function load(){
-  try{const r=localStorage.getItem(KEY);if(r)return JSON.parse(r);}catch(e){}
-  return {version:1,projekte:[],auftraege:[],tage:{},eingang:[]};
-}
-function save(){try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){alert('Speichern fehlgeschlagen. Läuft die App im privaten Modus?');}}
+/* ================= Daten ================= */
+const KEY='tagwerk-v1', MAX_AKTIV=3;
 const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,6);
 const iso=d=>{const x=new Date(d);x.setMinutes(x.getMinutes()-x.getTimezoneOffset());return x.toISOString().slice(0,10);};
 const today=()=>iso(new Date());
 const WT=['Sonntag','Montag','Dienstag','Mittwoch','Donnerstag','Freitag','Samstag'];
-function fmt(d){if(!d)return'';const [y,m,t]=d.split('-');return `${t}.${m}.`;}
-function tag(d){return S.tage[d]||(S.tage[d]={haupt:{text:'',bereich:'eigen',projektId:'',done:false},neben:[{text:'',bereich:'eigen',projektId:'',done:false},{text:'',bereich:'eigen',projektId:'',done:false}],geschafft:'',gedauert:''});}
-function aktive(){return S.projekte.filter(p=>p.status==='aktiv');}
-function proj(id){return S.projekte.find(p=>p.id===id);}
+const MON=['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
+const fmt=d=>d?`${d.slice(8,10)}.${d.slice(5,7)}.`:'';
+const fmtLong=d=>{const x=new Date(d+'T12:00:00');return `${WT[x.getDay()]}, ${x.getDate()}. ${MON[x.getMonth()]} ${x.getFullYear()}`;};
 const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const emptyTask=()=>({text:'',bereich:'eigen',projektId:'',schrittId:'',done:false});
+let S=load(), open=new Set(), editPlan=false, editFb=false;
 
-/* ---------- Navigation ---------- */
-function show(v){
-  document.querySelectorAll('.view').forEach(e=>e.classList.toggle('on',e.id==='v-'+v));
-  document.querySelectorAll('.tabs button').forEach(b=>b.classList.toggle('on',b.dataset.v===v));
-  window.scrollTo(0,0);render();
+function load(){
+  let d=null;try{const r=localStorage.getItem(KEY);if(r)d=JSON.parse(r);}catch(e){}
+  if(!d)d={version:2,projekte:[],auftraege:[],tage:{},eingang:[]};
+  /* Migration v1 -> v2 */
+  d.projekte.forEach(p=>{if(!p.schritte){p.schritte=[];if(p.naechster)p.schritte.push({id:uid(),text:p.naechster,done:false,ts:Date.now()});delete p.naechster;}});
+  d.auftraege.forEach(a=>{if(!a.schritte)a.schritte=[];});
+  Object.values(d.tage).forEach(T=>{if(T.geplant===undefined)T.geplant=!!(T.haupt&&T.haupt.text);if(T.abgegeben===undefined)T.abgegeben=!!(T.geschafft||T.gedauert);if(T.pakete===undefined)T.pakete='';});
+  d.version=2;return d;
 }
-function render(){renderHeute();renderProjekte();renderAuftraege();renderWoche();}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){alert('Speichern fehlgeschlagen. Läuft die App im privaten Modus?');}}
+function tag(d){return S.tage[d]||(S.tage[d]={haupt:emptyTask(),neben:[emptyTask(),emptyTask()],geschafft:'',gedauert:'',pakete:'',geplant:false,abgegeben:false});}
+const aktive=()=>S.projekte.filter(p=>p.status==='aktiv');
+const proj=id=>S.projekte.find(p=>p.id===id);
+const auftrag=id=>S.auftraege.find(a=>a.id===id);
+const offene=s=>s.filter(x=>!x.done);
+const nextStep=p=>offene(p.schritte)[0];
+function sortedSteps(s){return offene(s).concat(s.filter(x=>x.done).sort((a,b)=>(b.doneAt||0)-(a.doneAt||0)));}
 
-/* ---------- Sheet ---------- */
+/* ================= Navigation / Sheet ================= */
+function show(v){document.querySelectorAll('.view').forEach(e=>e.classList.toggle('on',e.id==='v-'+v));document.querySelectorAll('.tabs button').forEach(b=>b.classList.toggle('on',b.dataset.v===v));window.scrollTo(0,0);render();}
+function render(){renderHeute();renderProjekte();renderAuftraege();renderWoche();renderArchiv();}
 function openSheet(html){document.getElementById('sheet').innerHTML=html;document.getElementById('sheet-bg').classList.add('on');document.getElementById('sheet').classList.add('on');}
 function closeSheet(){document.getElementById('sheet-bg').classList.remove('on');document.getElementById('sheet').classList.remove('on');}
-function segHtml(id,val){return `<div class="seg" id="${id}"><button class="${val==='vater'?'on vater':''}" onclick="segSet('${id}','vater')">Für Vater</button><button class="${val==='eigen'?'on eigen':''}" onclick="segSet('${id}','eigen')">Eigenes</button></div>`;}
-function segSet(id,val){const s=document.getElementById(id);s.dataset.val=val;[...s.children].forEach((b,i)=>{b.className=(i===0&&val==='vater')?'on vater':(i===1&&val==='eigen')?'on eigen':'';});}
-function segVal(id){const s=document.getElementById(id);return s.dataset.val||([...s.children].find(b=>b.classList.contains('on'))?.classList.contains('vater')?'vater':'eigen');}
-function projSelect(id,val){const opts=aktive().map(p=>`<option value="${p.id}" ${p.id===val?'selected':''}>${esc(p.name)}</option>`).join('');return `<select id="${id}"><option value="">Kein Projekt</option>${opts}</select>`;}
+function segHtml(id,val,a='Für Vater',b='Eigenes',va='vater',vb='eigen'){return `<div class="seg" id="${id}" data-val="${val}"><button class="${val===va?'on '+va:''}" onclick="segSet('${id}','${va}')">${a}</button><button class="${val===vb?'on '+vb:''}" onclick="segSet('${id}','${vb}')">${b}</button></div>`;}
+function segSet(id,val){const s=document.getElementById(id);s.dataset.val=val;const [b1,b2]=s.children;const v1=b1.getAttribute('onclick').match(/'([^']+)'\)$/)[1];b1.className=val===v1?'on '+v1:'';b2.className=val!==v1?'on '+val:'';}
+const segVal=id=>document.getElementById(id).dataset.val;
+function projSelect(id,val){return `<select id="${id}"><option value="">Kein Projekt</option>${aktive().map(p=>`<option value="${p.id}" ${p.id===val?'selected':''}>${esc(p.name)}</option>`).join('')}</select>`;}
+function stepSelect(id,projektId,val){const p=proj(projektId);const st=p?offene(p.schritte):[];return `<select id="${id}" ${st.length?'':'disabled'}><option value="">${st.length?'Freier Text / kein Schritt':'Projekt hat keine offenen Schritte'}</option>${st.map(s=>`<option value="${s.id}" ${s.id===val?'selected':''}>${esc(s.text)}</option>`).join('')}</select>`;}
 
-/* ---------- Schnellerfassung / Eingang ---------- */
-function openQuick(){
-  openSheet(`<h3>Schnell erfassen</h3><div class="stack">
-    <textarea id="q-text" placeholder="Idee, Aufgabe, was auch immer…" autofocus></textarea>
-    <button class="btn solid" onclick="quickSave()">In den Eingang</button></div>`);
-  setTimeout(()=>document.getElementById('q-text').focus(),250);
-}
+/* ================= Eingang ================= */
+function openQuick(){openSheet(`<h3>Schnell erfassen</h3><div class="stack"><textarea id="q-text" placeholder="Idee, Aufgabe, was auch immer…"></textarea><button class="btn solid" onclick="quickSave()">In den Eingang</button></div>`);setTimeout(()=>document.getElementById('q-text').focus(),250);}
 function quickSave(){const t=document.getElementById('q-text').value.trim();if(!t)return;S.eingang.unshift({id:uid(),text:t,ts:Date.now()});save();closeSheet();render();}
 function openEingang(){
   if(!S.eingang.length){openSheet(`<h3>Eingang</h3><p class="empty">Leer. Alles zugeordnet.</p>`);return;}
-  openSheet(`<h3>Eingang</h3>`+S.eingang.map(e=>`<div class="zettel"><div class="t" style="margin-bottom:10px">${esc(e.text)}</div>
-    <div class="inline">
-      <button class="btn sm" onclick="eingangZu('${e.id}','haupt')">Heute Haupt</button>
-      <button class="btn sm" onclick="eingangZu('${e.id}','neben')">Heute Neben</button>
-      <button class="btn sm" onclick="eingangZu('${e.id}','auftrag')">Auftrag</button>
-      <button class="btn sm" onclick="eingangZu('${e.id}','projekt')">Projekt</button>
-      <button class="btn sm ghost" onclick="eingangDel('${e.id}')">Weg</button>
-    </div></div>`).join(''));
+  openSheet(`<h3>Eingang</h3>`+S.eingang.map(e=>`<div class="zettel"><div class="t" style="margin-bottom:10px">${esc(e.text)}</div><div class="inline">
+    <button class="btn sm" onclick="eingangZu('${e.id}','haupt')">Heute Haupt</button><button class="btn sm" onclick="eingangZu('${e.id}','neben')">Heute Neben</button>
+    <button class="btn sm" onclick="eingangZu('${e.id}','auftrag')">Auftrag</button><button class="btn sm" onclick="eingangZu('${e.id}','schritt')">Projektschritt</button>
+    <button class="btn sm ghost" onclick="eingangDel('${e.id}')">Weg</button></div></div>`).join(''));
 }
 function eingangDel(id){S.eingang=S.eingang.filter(e=>e.id!==id);save();openEingang();render();}
 function eingangZu(id,ziel){
   const e=S.eingang.find(x=>x.id===id);if(!e)return;const d=tag(today());
-  if(ziel==='haupt'){d.haupt.text=e.text;d.haupt.done=false;}
-  else if(ziel==='neben'){const slot=d.neben.find(n=>!n.text)||d.neben[1];slot.text=e.text;slot.done=false;}
-  else if(ziel==='auftrag'){eingangDel(id);openAuftragNeu(e.text);return;}
-  else if(ziel==='projekt'){eingangDel(id);openProjektNeu(e.text);return;}
-  eingangDel(id);show('heute');
+  if(ziel==='haupt'){d.haupt=Object.assign(emptyTask(),{text:e.text});d.geplant=false;editPlan=true;}
+  else if(ziel==='neben'){const slot=d.neben.find(n=>!n.text)||d.neben[1];Object.assign(slot,emptyTask(),{text:e.text});d.geplant=false;editPlan=true;}
+  else if(ziel==='auftrag'){eingangDel(id);closeSheet();openAuftragForm(null,e.text);return;}
+  else if(ziel==='schritt'){eingangDel(id);closeSheet();openStepZiel(e.text);return;}
+  eingangDel(id);closeSheet();show('heute');
+}
+function openStepZiel(text){
+  const ps=S.projekte.filter(p=>p.status!=='fertig');
+  if(!ps.length){alert('Noch kein Projekt angelegt.');return;}
+  openSheet(`<h3>Als Schritt zu welchem Projekt?</h3><div class="stack"><input id="sz-text" value="${esc(text)}"><select id="sz-p">${ps.map(p=>`<option value="${p.id}">${esc(p.name)}${p.status==='eis'?' (Eisfach)':''}</option>`).join('')}</select><button class="btn solid" onclick="stepAdd(document.getElementById('sz-p').value,document.getElementById('sz-text').value);closeSheet();show('projekte')">Hinzufügen</button></div>`);
 }
 
-/* ---------- HEUTE ---------- */
+/* ================= HEUTE ================= */
 function renderHeute(){
   const d=today(),T=tag(d),now=new Date();
   document.getElementById('h-wtag').textContent=WT[now.getDay()];
-  document.getElementById('h-datum').textContent=`${now.getDate()}. ${now.toLocaleString('de-DE',{month:'long'})}`;
+  document.getElementById('h-datum').textContent=`${now.getDate()}. ${MON[now.getMonth()]}`;
   const eb=document.getElementById('h-eingang');eb.textContent=`Eingang · ${S.eingang.length}`;eb.classList.toggle('alarm',S.eingang.length>0);
 
-  const offen=S.auftraege.filter(a=>a.status==='offen').sort((a,b)=>(a.termin||'9')<(b.termin||'9')?-1:1);
-  document.getElementById('h-auftraege').innerHTML=offen.length?offen.map(a=>auftragZettel(a,true)).join(''):`<div class="empty">Keine offenen Aufträge.</div>`;
+  /* Pakete */
+  const pk=document.getElementById('h-pakete');
+  if(T.geplant&&!editPlan){pk.innerHTML=`<div class="pk ${T.pakete}"><div><b>Paketabgabe 15:00</b><div class="small muted">${T.pakete==='ja'?'Heute ja — vor 15 Uhr packen.':T.pakete==='nein'?'Heute nicht.':'Noch nicht entschieden.'}</div></div><button class="btn sm ghost" onclick="paketeToggle()">${T.pakete==='ja'?'Doch nicht':'Doch ja'}</button></div>`;}
+  else pk.innerHTML='';
 
-  const h=T.haupt;
-  document.getElementById('h-haupt').innerHTML=`<div class="row" style="align-items:flex-start">
-    <button class="chk ${h.done?'on':''}" onclick="toggleDone('haupt')">${h.done?'✓':''}</button>
-    <div class="grow"><div class="lbl">Das eine Ding heute</div>
-      <textarea placeholder="Wenn nur das fertig wird, war der Tag gut." oninput="setTask('haupt',0,'text',this.value)">${esc(h.text)}</textarea>
-      <div class="row" style="margin-top:8px">${segHtml('seg-haupt',h.bereich)}</div>
-      <div style="margin-top:8px">${projSelect('sel-haupt',h.projektId)}</div>
-    </div></div>`;
-  bindTask('seg-haupt','sel-haupt','haupt',0);
+  /* Aufträge */
+  const offen=S.auftraege.filter(a=>a.status==='offen').sort(byTermin);
+  document.getElementById('h-auftraege').innerHTML=cols(offen.filter(a=>a.bereich==='vater').map(a=>auftragZettel(a,true)),offen.filter(a=>a.bereich!=='vater').map(a=>auftragZettel(a,true)),'Keine offen');
 
-  document.getElementById('h-neben').innerHTML=T.neben.map((n,i)=>`<div class="zettel ${n.bereich} ${n.done?'done':''}"><div class="row" style="align-items:flex-start">
-    <button class="chk ${n.done?'on':''}" onclick="toggleDone('neben',${i})">${n.done?'✓':''}</button>
-    <div class="grow"><textarea placeholder="Nebenaufgabe ${i+1}" oninput="setTask('neben',${i},'text',this.value)">${esc(n.text)}</textarea>
-      <div class="row" style="margin-top:8px">${segHtml('seg-neben'+i,n.bereich)}</div>
-      <div style="margin-top:8px">${projSelect('sel-neben'+i,n.projektId)}</div>
-    </div></div></div>`).join('');
-  T.neben.forEach((n,i)=>bindTask('seg-neben'+i,'sel-neben'+i,'neben',i));
+  /* Plan */
+  const pl=document.getElementById('h-plan');
+  if(!T.geplant||editPlan){
+    pl.innerHTML=`<div class="form" id="plan-form">
+      <label>Das eine Ding heute</label>${taskForm('h',T.haupt)}
+      <label>Nebenaufgabe 1</label>${taskForm('n0',T.neben[0])}
+      <label>Nebenaufgabe 2</label>${taskForm('n1',T.neben[1])}
+      <label>Paketabgabe 15:00</label>${segHtml('seg-pk',T.pakete||'nein','Ja, heute','Nein','ja','nein')}
+      <div style="margin-top:16px" class="stack"><button class="btn solid" onclick="planAbgeben()">Tag festlegen</button>${T.geplant?`<button class="btn ghost" onclick="editPlan=false;renderHeute()">Abbrechen</button>`:''}</div></div>`;
+    ['h','n0','n1'].forEach(k=>bindTaskForm(k));
+  }else{
+    const all=[[T.haupt,'haupt',0],[T.neben[0],'neben',0],[T.neben[1],'neben',1]].filter(x=>x[0].text);
+    pl.innerHTML=cols(all.filter(x=>x[0].bereich==='vater').map(x=>taskView(...x)),all.filter(x=>x[0].bereich!=='vater').map(x=>taskView(...x)),'Nichts heute')+`<div style="text-align:right"><button class="link" onclick="editPlan=true;renderHeute()">Plan bearbeiten</button></div>`;
+  }
 
-  const fb=document.getElementById('h-fb');fb.classList.toggle('now',now.getHours()>=18);
-  fb.innerHTML=`<label>Was ist fertig geworden?</label><textarea oninput="setTag('geschafft',this.value)">${esc(T.geschafft)}</textarea>
-    <label>Was hat länger gedauert als gedacht?</label><textarea oninput="setTag('gedauert',this.value)">${esc(T.gedauert)}</textarea>`;
+  /* Feierabend */
+  const fb=document.getElementById('h-fb');
+  if(!T.abgegeben||editFb){
+    fb.innerHTML=`<div class="form ${now.getHours()>=18?'now':''}"><label>Was ist fertig geworden?</label><textarea id="fb-1">${esc(T.geschafft)}</textarea>
+      <label>Was hat länger gedauert als gedacht?</label><textarea id="fb-2">${esc(T.gedauert)}</textarea>
+      <div style="margin-top:16px" class="stack"><button class="btn solid" onclick="fbAbgeben()">Feierabend abgeben</button>${T.abgegeben?`<button class="btn ghost" onclick="editFb=false;renderHeute()">Abbrechen</button>`:''}</div></div>`;
+  }else{
+    fb.innerHTML=`<div class="form"><div class="muted small">Fertig geworden</div><div style="margin:4px 0 12px;white-space:pre-wrap">${T.geschafft?esc(T.geschafft):'—'}</div><div class="muted small">Länger gedauert</div><div style="margin-top:4px;white-space:pre-wrap">${T.gedauert?esc(T.gedauert):'—'}</div>
+      <div style="text-align:right;margin-top:6px"><button class="link" onclick="editFb=true;renderHeute()">Bearbeiten</button></div></div>`;
+  }
 }
-function bindTask(segId,selId,kind,i){
-  const seg=document.getElementById(segId);
-  seg.querySelectorAll('button').forEach((b,bi)=>b.addEventListener('click',()=>setTask(kind,i,'bereich',bi===0?'vater':'eigen')));
-  document.getElementById(selId).addEventListener('change',e=>{setTask(kind,i,'projektId',e.target.value);const p=proj(e.target.value);if(p){setTask(kind,i,'bereich',p.bereich);segSet(segId,p.bereich);}});
+function cols(v,e,leer){return `<div class="cols"><div><div class="colh vater">Für Vater</div>${v.length?v.join(''):`<div class="empty">${leer}</div>`}</div><div><div class="colh eigen">Eigenes</div>${e.length?e.join(''):`<div class="empty">${leer}</div>`}</div></div>`;}
+function taskForm(k,t){return `<div class="stack"><textarea id="tf-${k}" placeholder="${k==='h'?'Wenn nur das fertig wird, war der Tag gut.':'Optional'}">${esc(t.text)}</textarea>${segHtml('seg-'+k,t.bereich)}${projSelect('sel-'+k,t.projektId)}<div id="stw-${k}">${stepSelect('st-'+k,t.projektId,t.schrittId)}</div></div>`;}
+function bindTaskForm(k){
+  const sel=document.getElementById('sel-'+k);
+  sel.addEventListener('change',()=>{const p=proj(sel.value);if(p)segSet('seg-'+k,p.bereich);document.getElementById('stw-'+k).innerHTML=stepSelect('st-'+k,sel.value,'');bindStep(k);});
+  bindStep(k);
 }
-function setTask(kind,i,f,v){const T=tag(today());const t=kind==='haupt'?T.haupt:T.neben[i];t[f]=v;if(f==='bereich')t.bereich=v;save();if(f==='done'||f==='bereich')renderHeuteSoft();}
-function toggleDone(kind,i){const T=tag(today());const t=kind==='haupt'?T.haupt:T.neben[i];t.done=!t.done;if(t.done)t.doneAt=today();save();renderHeute();}
-function renderHeuteSoft(){/* Bereich-Farbe an Nebenzetteln nachziehen ohne Fokus zu verlieren */
-  const T=tag(today());document.querySelectorAll('#h-neben .zettel').forEach((z,i)=>{z.className=`zettel ${T.neben[i].bereich} ${T.neben[i].done?'done':''}`;});}
-function setTag(f,v){tag(today())[f]=v;save();}
+function bindStep(k){const st=document.getElementById('st-'+k);st.addEventListener('change',()=>{const p=proj(document.getElementById('sel-'+k).value);const s=p&&p.schritte.find(x=>x.id===st.value);const ta=document.getElementById('tf-'+k);if(s&&!ta.value.trim())ta.value=s.text;});}
+function readTask(k,old){return {text:document.getElementById('tf-'+k).value.trim(),bereich:segVal('seg-'+k),projektId:document.getElementById('sel-'+k).value,schrittId:document.getElementById('st-'+k).value,done:old.done||false,doneAt:old.doneAt};}
+function planAbgeben(){
+  const T=tag(today());const h=readTask('h',T.haupt);
+  if(!h.text){alert('Ohne Hauptaufgabe kein Plan. Eins muss es sein.');return;}
+  T.haupt=h;T.neben=[readTask('n0',T.neben[0]),readTask('n1',T.neben[1])];T.pakete=segVal('seg-pk');T.geplant=true;editPlan=false;save();render();
+}
+function taskView(t,kind,i){
+  const p=proj(t.projektId);
+  return `<div class="zettel ${t.bereich} ${kind==='haupt'?'haupt':''} ${t.done?'done':''}"><div class="row"><button class="chk" onclick="taskToggle('${kind}',${i})">${t.done?'✓':''}</button>
+    <div class="grow"><div class="t ${kind==='haupt'?'big':''}">${esc(t.text)}</div>${p?`<div class="prev">${esc(p.name)}</div>`:''}</div></div></div>`;
+}
+function taskToggle(kind,i){
+  const T=tag(today());const t=kind==='haupt'?T.haupt:T.neben[i];t.done=!t.done;t.doneAt=t.done?today():'';
+  if(t.schrittId){const p=proj(t.projektId);const s=p&&p.schritte.find(x=>x.id===t.schrittId);if(s){s.done=t.done;s.doneAt=t.done?Date.now():0;}}
+  save();render();
+}
+function paketeToggle(){const T=tag(today());T.pakete=T.pakete==='ja'?'nein':'ja';save();renderHeute();}
+function fbAbgeben(){const T=tag(today());T.geschafft=document.getElementById('fb-1').value.trim();T.gedauert=document.getElementById('fb-2').value.trim();T.abgegeben=true;editFb=false;save();render();}
 
-/* ---------- AUFTRÄGE ---------- */
+/* ================= Schritte (Projekte + Aufträge) ================= */
+function holder(id){return proj(id)||auftrag(id);}
+function stepsHtml(ownerId,s){
+  const list=sortedSteps(s);
+  return `<div class="steps">${list.length?list.map(x=>`<div class="step ${x.done?'done':''}"><button class="chk sm ${x.done?'on':''}" onclick="stepToggle('${ownerId}','${x.id}')">${x.done?'✓':''}</button><div class="st"><span class="tx">${esc(x.text)}</span>${x.done?`<span class="small muted"> · ${fmt(iso(x.doneAt||Date.now()))}</span>`:''}</div><button class="del" onclick="stepDel('${ownerId}','${x.id}')">×</button></div>`).join(''):`<div class="empty small">Noch keine Schritte.</div>`}
+    <div class="addstep"><input id="ns-${ownerId}" placeholder="Nächster Schritt…" onkeydown="if(event.key==='Enter'){stepAdd('${ownerId}',this.value);}"><button class="btn sm" onclick="stepAdd('${ownerId}',document.getElementById('ns-${ownerId}').value)">+</button></div></div>`;
+}
+function stepAdd(ownerId,text){text=(text||'').trim();if(!text)return;const o=holder(ownerId);if(!o)return;o.schritte.push({id:uid(),text,done:false,ts:Date.now()});open.add(ownerId);save();render();const i=document.getElementById('ns-'+ownerId);if(i)i.focus();}
+function stepToggle(ownerId,id){const o=holder(ownerId);const s=o.schritte.find(x=>x.id===id);s.done=!s.done;s.doneAt=s.done?Date.now():0;save();render();}
+function stepDel(ownerId,id){const o=holder(ownerId);if(!confirm('Schritt löschen?'))return;o.schritte=o.schritte.filter(x=>x.id!==id);save();render();}
+function toggleOpen(id){open.has(id)?open.delete(id):open.add(id);render();}
+
+/* ================= AUFTRÄGE ================= */
+const byTermin=(a,b)=>(a.termin||'9')<(b.termin||'9')?-1:1;
 function auftragZettel(a,heute){
   const t=today();let cls='',txt=a.termin?fmt(a.termin):'ohne Termin';
   if(a.termin&&a.status==='offen'){if(a.termin<t){cls='over';txt='überfällig · '+txt;}else if(a.termin===t){cls='today';txt='heute';}}
+  const ns=nextStep(a),no=offene(a.schritte).length,nd=a.schritte.length-no,isOpen=open.has(a.id);
   return `<div class="zettel ${a.bereich} ${a.status==='fertig'?'done':''}"><div class="row">
     <button class="chk ${a.status==='fertig'?'on':''}" onclick="auftragToggle('${a.id}')">${a.status==='fertig'?'✓':''}</button>
-    <div class="grow"><div class="t">${esc(a.name)}</div><div class="due ${cls}">${txt}</div></div>
-    ${heute?'':`<button class="btn sm ghost" onclick="auftragDel('${a.id}')">Weg</button>`}
-  </div></div>`;
+    <div class="grow open-h" onclick="toggleOpen('${a.id}')"><div class="t">${esc(a.name)}</div><div class="due ${cls}">${txt}</div>
+      ${ns&&!isOpen?`<div class="prev">Als nächstes: <b>${esc(ns.text)}</b></div>`:''}${a.schritte.length&&!isOpen?`<div class="prev">${no} offen · ${nd} erledigt</div>`:''}</div>
+    <span class="arrow ${isOpen?'on':''}" onclick="toggleOpen('${a.id}')">▶</span></div>
+    ${isOpen?stepsHtml(a.id,a.schritte)+`<div class="inline" style="margin-top:12px"><button class="btn sm ghost" onclick="openAuftragForm('${a.id}')">Bearbeiten</button>${heute?'':`<button class="btn sm ghost" onclick="auftragDel('${a.id}')">Löschen</button>`}</div>`:''}</div>`;
 }
 function renderAuftraege(){
-  const offen=S.auftraege.filter(a=>a.status==='offen').sort((a,b)=>(a.termin||'9')<(b.termin||'9')?-1:1);
-  const fertig=S.auftraege.filter(a=>a.status==='fertig').sort((a,b)=>(b.erledigtAm||'')<(a.erledigtAm||'')?-1:1);
+  const offen=S.auftraege.filter(a=>a.status==='offen').sort(byTermin),fertig=S.auftraege.filter(a=>a.status==='fertig').sort((a,b)=>(b.erledigtAm||'')<(a.erledigtAm||'')?-1:1);
   document.getElementById('a-offen').innerHTML=offen.length?offen.map(a=>auftragZettel(a,false)).join(''):`<div class="empty">Nichts offen.</div>`;
-  document.getElementById('a-fertig').innerHTML=fertig.length?fertig.slice(0,30).map(a=>auftragZettel(a,false)).join(''):`<div class="empty">Noch nichts erledigt.</div>`;
+  document.getElementById('a-fertig').innerHTML=fertig.length?fertig.slice(0,50).map(a=>auftragZettel(a,false)).join(''):`<div class="empty">Noch nichts erledigt.</div>`;
 }
-function openAuftragNeu(text=''){
-  openSheet(`<h3>Neuer Auftrag</h3><div class="stack">
-    <input id="a-name" placeholder="Was ist zu fertigen?" value="${esc(text)}">
-    ${segHtml('a-seg','vater')}
-    <input id="a-termin" type="date" value="">
-    <button class="btn solid" onclick="auftragSave()">Anlegen</button></div>`);
+function openAuftragForm(id=null,text=''){
+  const a=id?auftrag(id):{name:text,bereich:'vater',termin:''};
+  openSheet(`<h3>${id?'Auftrag bearbeiten':'Neuer Auftrag'}</h3><div class="stack"><input id="a-name" placeholder="Was ist zu fertigen?" value="${esc(a.name)}">${segHtml('a-seg',a.bereich)}<input id="a-termin" type="date" value="${a.termin||''}">
+    ${id?'':`<textarea id="a-steps" placeholder="Zwischenschritte, je Zeile einer (optional)&#10;Material bestellen&#10;Bestücken&#10;Prüfen"></textarea>`}
+    <button class="btn solid" onclick="auftragSave(${id?`'${id}'`:'null'})">${id?'Speichern':'Anlegen'}</button></div>`);
 }
-function auftragSave(){const n=document.getElementById('a-name').value.trim();if(!n)return;
-  S.auftraege.push({id:uid(),name:n,bereich:segVal('a-seg'),termin:document.getElementById('a-termin').value||'',status:'offen',erstellt:today()});save();closeSheet();render();}
-function auftragToggle(id){const a=S.auftraege.find(x=>x.id===id);a.status=a.status==='offen'?'fertig':'offen';a.erledigtAm=a.status==='fertig'?today():'';save();render();}
-function auftragDel(id){if(!confirm('Auftrag löschen?'))return;S.auftraege=S.auftraege.filter(a=>a.id!==id);save();render();}
+function auftragSave(id){
+  const n=document.getElementById('a-name').value.trim();if(!n)return;
+  if(id){const a=auftrag(id);a.name=n;a.bereich=segVal('a-seg');a.termin=document.getElementById('a-termin').value||'';}
+  else{const st=(document.getElementById('a-steps').value||'').split('\n').map(x=>x.trim()).filter(Boolean).map(text=>({id:uid(),text,done:false,ts:Date.now()}));
+    S.auftraege.push({id:uid(),name:n,bereich:segVal('a-seg'),termin:document.getElementById('a-termin').value||'',status:'offen',erstellt:today(),schritte:st});}
+  save();closeSheet();render();
+}
+function auftragToggle(id){const a=auftrag(id);if(a.status==='offen'&&offene(a.schritte).length&&!confirm(`Noch ${offene(a.schritte).length} Schritte offen. Trotzdem als fertig markieren?`))return;a.status=a.status==='offen'?'fertig':'offen';a.erledigtAm=a.status==='fertig'?today():'';save();render();}
+function auftragDel(id){if(!confirm('Auftrag endgültig löschen?'))return;S.auftraege=S.auftraege.filter(a=>a.id!==id);save();render();}
 
-/* ---------- PROJEKTE ---------- */
+/* ================= PROJEKTE ================= */
 function projZettel(p){
-  const akt=p.status==='aktiv';
-  return `<div class="zettel ${p.bereich}">
-    <div class="t" style="font-size:19px">${esc(p.name)}</div>
-    ${akt?`<div class="muted small" style="margin:6px 0 4px">Nächster Schritt</div>
-    <textarea style="min-height:52px" placeholder="Genau ein Schritt, nicht zwölf." oninput="projSet('${p.id}','naechster',this.value)">${esc(p.naechster||'')}</textarea>
-    <div class="inline" style="margin-top:10px"><button class="btn sm ghost" onclick="projStatus('${p.id}','eis')">Auf Eis</button><button class="btn sm ghost" onclick="projStatus('${p.id}','fertig')">Abgeschlossen</button></div>`
-    :`<div class="muted small" style="margin:4px 0 10px">${p.naechster?esc(p.naechster):'—'}</div>
-    <div class="inline"><button class="btn sm" onclick="projStatus('${p.id}','aktiv')">Aktivieren</button><button class="btn sm ghost" onclick="projDel('${p.id}')">Löschen</button></div>`}
-  </div>`;
+  const akt=p.status==='aktiv',ns=nextStep(p),no=offene(p.schritte).length,nd=p.schritte.length-no,isOpen=open.has(p.id);
+  return `<div class="zettel ${p.bereich}"><div class="row">
+    <div class="grow open-h" onclick="toggleOpen('${p.id}')"><div class="t" style="font-size:19px">${esc(p.name)}</div>
+      ${!isOpen?(ns?`<div class="prev">Als nächstes: <b>${esc(ns.text)}</b></div>`:`<div class="prev">Kein offener Schritt</div>`)+`<div class="prev">${no} offen · ${nd} erledigt</div>`:''}</div>
+    <span class="arrow ${isOpen?'on':''}" onclick="toggleOpen('${p.id}')">▶</span></div>
+    ${isOpen?stepsHtml(p.id,p.schritte)+`<div class="inline" style="margin-top:12px"><button class="btn sm ghost" onclick="openProjektForm('${p.id}')">Bearbeiten</button>
+      ${akt?`<button class="btn sm ghost" onclick="projStatus('${p.id}','eis')">Auf Eis</button><button class="btn sm ghost" onclick="projStatus('${p.id}','fertig')">Abgeschlossen</button>`
+      :`<button class="btn sm" onclick="projStatus('${p.id}','aktiv')">Aktivieren</button><button class="btn sm ghost" onclick="projDel('${p.id}')">Löschen</button>`}</div>`:''}</div>`;
 }
 function renderProjekte(){
   const a=aktive(),e=S.projekte.filter(p=>p.status==='eis'),f=S.projekte.filter(p=>p.status==='fertig');
-  const c=document.getElementById('p-count');c.textContent=`${a.length} / ${MAX_AKTIV} aktiv`;c.classList.toggle('full',a.length>=MAX_AKTIV);
+  const c=document.getElementById('p-count');c.textContent=`${a.length} / ${MAX_AKTIV} aktiv`;c.classList.toggle('alarm',a.length>=MAX_AKTIV);
   document.getElementById('p-aktiv').innerHTML=a.length?a.map(projZettel).join(''):`<div class="hint">Kein aktives Projekt. Drei dürfen gleichzeitig laufen — mehr nicht.</div>`;
   document.getElementById('p-eis').innerHTML=e.length?e.map(projZettel).join(''):`<div class="empty">Eisfach leer.</div>`;
   document.getElementById('p-fertig').innerHTML=f.length?f.map(projZettel).join(''):`<div class="empty">Noch nichts abgeschlossen.</div>`;
 }
-function openProjektNeu(text=''){
-  const voll=aktive().length>=MAX_AKTIV;
-  openSheet(`<h3>Neues Projekt</h3>${voll?`<div class="notice">Du hast schon ${MAX_AKTIV} aktive Projekte. Das hier landet im Eisfach.</div>`:''}<div class="stack">
-    <input id="p-name" placeholder="Projektname" value="${esc(text)}">
-    ${segHtml('p-seg','eigen')}
-    <textarea id="p-next" placeholder="Nächster konkreter Schritt"></textarea>
-    <button class="btn solid" onclick="projSave(${voll})">Anlegen</button></div>`);
+function openProjektForm(id=null){
+  const p=id?proj(id):{name:'',bereich:'eigen'};const voll=!id&&aktive().length>=MAX_AKTIV;
+  openSheet(`<h3>${id?'Projekt bearbeiten':'Neues Projekt'}</h3>${voll?`<div class="notice">Du hast schon ${MAX_AKTIV} aktive Projekte. Das hier landet im Eisfach.</div>`:''}<div class="stack">
+    <input id="p-name" placeholder="Projektname" value="${esc(p.name)}">${segHtml('p-seg',p.bereich)}
+    ${id?'':`<textarea id="p-steps" placeholder="Erste Schritte, je Zeile einer&#10;Schaltplan prüfen&#10;Platine bestellen"></textarea>`}
+    <button class="btn solid" onclick="projSave(${id?`'${id}'`:'null'},${voll})">${id?'Speichern':'Anlegen'}</button></div>`);
 }
-function projSave(voll){const n=document.getElementById('p-name').value.trim();if(!n)return;
-  S.projekte.push({id:uid(),name:n,bereich:segVal('p-seg'),naechster:document.getElementById('p-next').value.trim(),status:voll?'eis':'aktiv',erstellt:today()});save();closeSheet();render();}
-function projSet(id,f,v){proj(id)[f]=v;save();}
-function projStatus(id,st){
-  if(st==='aktiv'&&aktive().length>=MAX_AKTIV){alert(`Schon ${MAX_AKTIV} aktive Projekte. Leg erst eins auf Eis.`);return;}
-  const p=proj(id);p.status=st;if(st==='fertig')p.fertigAm=today();save();render();
+function projSave(id,voll){
+  const n=document.getElementById('p-name').value.trim();if(!n)return;
+  if(id){const p=proj(id);p.name=n;p.bereich=segVal('p-seg');}
+  else{const st=(document.getElementById('p-steps').value||'').split('\n').map(x=>x.trim()).filter(Boolean).map(text=>({id:uid(),text,done:false,ts:Date.now()}));
+    const np={id:uid(),name:n,bereich:segVal('p-seg'),status:voll?'eis':'aktiv',erstellt:today(),schritte:st};S.projekte.push(np);open.add(np.id);}
+  save();closeSheet();render();
 }
+function projStatus(id,st){if(st==='aktiv'&&aktive().length>=MAX_AKTIV){alert(`Schon ${MAX_AKTIV} aktive Projekte. Leg erst eins auf Eis.`);return;}const p=proj(id);p.status=st;if(st==='fertig')p.fertigAm=today();save();render();}
 function projDel(id){if(!confirm('Projekt endgültig löschen?'))return;S.projekte=S.projekte.filter(p=>p.id!==id);save();render();}
 
-/* ---------- WOCHE ---------- */
+/* ================= WOCHE ================= */
 function kw(d){const x=new Date(d);x.setHours(0,0,0,0);x.setDate(x.getDate()+3-((x.getDay()+6)%7));const w1=new Date(x.getFullYear(),0,4);return 1+Math.round(((x-w1)/864e5-3+((w1.getDay()+6)%7))/7);}
 function renderWoche(){
   const now=new Date();document.getElementById('w-kw').textContent=`KW ${kw(now)}`;
-  const a=aktive();
-  document.getElementById('w-projekte').innerHTML=a.length?a.map(p=>`<div class="zettel ${p.bereich}"><div class="t">${esc(p.name)}</div>
-    <textarea style="min-height:52px;margin-top:6px" placeholder="Was ist diese Woche der eine Schritt?" oninput="projSet('${p.id}','naechster',this.value)">${esc(p.naechster||'')}</textarea></div>`).join(''):`<div class="empty">Kein aktives Projekt.</div>`;
+  document.getElementById('w-projekte').innerHTML=aktive().length?aktive().map(p=>{const ns=nextStep(p);return `<div class="zettel ${p.bereich}"><div class="t">${esc(p.name)}</div><div class="prev">${ns?`Als nächstes: <b>${esc(ns.text)}</b>`:'<span style="color:var(--alarm)">Kein offener Schritt — im Projekte-Tab eintragen.</span>'}</div><div class="prev">${offene(p.schritte).length} offen</div></div>`;}).join(''):`<div class="empty">Kein aktives Projekt.</div>`;
   const mo=new Date(now);mo.setDate(now.getDate()-((now.getDay()+6)%7));const so=new Date(mo);so.setDate(mo.getDate()+6);
-  const inWeek=S.auftraege.filter(x=>x.status==='offen'&&x.termin&&x.termin>=iso(mo)&&x.termin<=iso(so)).sort((x,y)=>x.termin<y.termin?-1:1);
-  const over=S.auftraege.filter(x=>x.status==='offen'&&x.termin&&x.termin<iso(mo));
-  document.getElementById('w-termine').innerHTML=(over.concat(inWeek)).length?over.concat(inWeek).map(x=>auftragZettel(x,true)).join(''):`<div class="empty">Keine Termine diese Woche.</div>`;
-
-  /* Auswertung */
-  let v=0,e=0,tage=0,laenger=0,geplant=0;const projHits={};
-  for(let i=0;i<14;i++){const d=new Date(now);d.setDate(now.getDate()-i);const T=S.tage[iso(d)];if(!T)continue;tage++;
-    if(T.haupt.text)geplant++;if(T.gedauert&&T.gedauert.trim())laenger++;
-    [T.haupt,...T.neben].forEach(t=>{if(t.done&&t.text){t.bereich==='vater'?v++:e++;if(t.projektId)projHits[t.projektId]=(projHits[t.projektId]||0)+1;}});}
-  const af=S.auftraege.filter(x=>x.status==='fertig'&&x.erledigtAm&&(now-new Date(x.erledigtAm))/864e5<=14);
-  af.forEach(x=>x.bereich==='vater'?v++:e++);
-  const tot=v+e||1;
-  const hits=Object.entries(projHits).map(([id,n])=>{const p=proj(id);return p?`<div class="kv"><span>${esc(p.name)}</span><b>${n}</b></div>`:'';}).join('');
-  const stale=aktive().filter(p=>!projHits[p.id]&&(!p.erstellt||(now-new Date(p.erstellt))/864e5>=7));
-  document.getElementById('w-stats').innerHTML=`
-    <div class="row" style="justify-content:space-between"><span><span class="tag vater">Vater</span> ${v}</span><span>${e} <span class="tag eigen">Eigenes</span></span></div>
-    <div class="bar"><i class="v" style="width:${v/tot*100}%"></i><i class="e" style="width:${e/tot*100}%"></i></div>
-    <div class="muted small">Erledigte Aufgaben und Aufträge nach Bereich</div>
-    <div class="kv"><span>Tage mit Plan</span><b>${geplant} / 14</b></div>
-    <div class="kv"><span>Tage, an denen etwas länger dauerte</span><b>${laenger}</b></div>
-    ${hits?`<div style="margin-top:12px;font-weight:700">Projekte mit Fortschritt</div>${hits}`:''}
-    ${stale.length?`<div class="hint" style="margin-top:12px">Ohne erledigte Aufgabe in 14 Tagen: ${stale.map(p=>esc(p.name)).join(', ')}. Eisfach?</div>`:''}`;
+  const inWeek=S.auftraege.filter(x=>x.status==='offen'&&x.termin&&x.termin>=iso(mo)&&x.termin<=iso(so)).sort(byTermin),over=S.auftraege.filter(x=>x.status==='offen'&&x.termin&&x.termin<iso(mo));
+  const all=over.concat(inWeek);document.getElementById('w-termine').innerHTML=all.length?all.map(x=>auftragZettel(x,true)).join(''):`<div class="empty">Keine Termine diese Woche.</div>`;
+  let v=0,e=0,laenger=0,geplant=0,pk=0;const hits={};
+  for(let i=0;i<14;i++){const d=new Date(now);d.setDate(now.getDate()-i);const T=S.tage[iso(d)];if(!T)continue;if(T.geplant)geplant++;if(T.gedauert)laenger++;if(T.pakete==='ja')pk++;
+    [T.haupt,...T.neben].forEach(t=>{if(t.done&&t.text){t.bereich==='vater'?v++:e++;if(t.projektId)hits[t.projektId]=(hits[t.projektId]||0)+1;}});}
+  S.projekte.forEach(p=>p.schritte.forEach(s=>{if(s.done&&s.doneAt&&(now-s.doneAt)/864e5<=14){p.bereich==='vater'?v++:e++;hits[p.id]=(hits[p.id]||0)+1;}}));
+  S.auftraege.filter(x=>x.status==='fertig'&&x.erledigtAm&&(now-new Date(x.erledigtAm))/864e5<=14).forEach(x=>x.bereich==='vater'?v++:e++);
+  const tot=v+e||1,hitHtml=Object.entries(hits).map(([id,n])=>{const p=proj(id);return p?`<div class="kv"><span>${esc(p.name)}</span><b>${n}</b></div>`:'';}).join('');
+  const stale=aktive().filter(p=>!hits[p.id]&&(!p.erstellt||(now-new Date(p.erstellt))/864e5>=7));
+  document.getElementById('w-stats').innerHTML=`<div class="row" style="justify-content:space-between"><span><span class="tag vater">Vater</span> ${v}</span><span>${e} <span class="tag eigen">Eigenes</span></span></div>
+    <div class="bar"><i class="v" style="width:${v/tot*100}%"></i><i class="e" style="width:${e/tot*100}%"></i></div><div class="muted small">Erledigte Aufgaben, Schritte und Aufträge nach Bereich</div>
+    <div class="kv"><span>Tage mit Plan</span><b>${geplant} / 14</b></div><div class="kv"><span>Tage, an denen etwas länger dauerte</span><b>${laenger}</b></div><div class="kv"><span>Paketabgaben</span><b>${pk}</b></div>
+    ${hitHtml?`<div style="margin-top:12px;font-weight:700">Projekte mit Fortschritt</div>${hitHtml}`:''}
+    ${stale.length?`<div class="hint" style="margin-top:12px">Ohne Fortschritt in 14 Tagen: ${stale.map(p=>esc(p.name)).join(', ')}. Eisfach?</div>`:''}`;
 }
 
-/* ---------- Sicherung ---------- */
+/* ================= ARCHIV + SUCHE ================= */
+function hl(s,q){s=esc(s);if(!q)return s;const r=new RegExp(q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'),'ig');return s.replace(r,m=>`<mark>${m}</mark>`);}
+function dayHtml(d,T,q=''){
+  const tasks=[T.haupt,...T.neben].filter(t=>t.text);
+  return `<div class="day"><div class="dh"><span>${fmtLong(d)}</span><span class="small muted">${T.pakete==='ja'?'📦 15:00':''}</span></div>
+    ${tasks.length?`<ul>${tasks.map((t,i)=>`<li class="${t.done?'d':'o'}">${i===0?'<b>':''}${hl(t.text,q)}${i===0?'</b>':''} <span class="tag ${t.bereich}" style="font-size:11px">${t.bereich==='vater'?'V':'E'}</span></li>`).join('')}</ul>`:`<div class="q">Kein Plan</div>`}
+    ${T.geschafft?`<div class="q"><b>Fertig:</b> ${hl(T.geschafft,q)}</div>`:''}${T.gedauert?`<div class="q"><b>Länger:</b> ${hl(T.gedauert,q)}</div>`:''}</div>`;
+}
+function renderArchiv(){
+  const q=(document.getElementById('s-q').value||'').trim(),out=document.getElementById('s-out'),ql=q.toLowerCase();
+  if(!q){
+    const days=Object.keys(S.tage).filter(d=>d!==today()).sort().reverse();
+    if(!days.length){out.innerHTML=`<div class="empty">Noch keine vergangenen Tage. Ab morgen steht hier alles.</div>`;return;}
+    let cur='',html='';days.forEach(d=>{const m=d.slice(0,7);if(m!==cur){cur=m;html+=`<div class="monat">${MON[+d.slice(5,7)-1]} ${d.slice(0,4)}</div>`;}html+=dayHtml(d,S.tage[d]);});out.innerHTML=html;return;
+  }
+  const hits=[];const has=s=>(s||'').toLowerCase().includes(ql);
+  Object.entries(S.tage).sort((a,b)=>a[0]<b[0]?1:-1).forEach(([d,T])=>{if([T.haupt,...T.neben].some(t=>has(t.text))||has(T.geschafft)||has(T.gedauert))hits.push({k:'Tag',d,html:dayHtml(d,T,q)});});
+  S.projekte.forEach(p=>{const ms=p.schritte.filter(s=>has(s.text));if(has(p.name)||ms.length)hits.push({k:'Projekt',html:`<div class="hit"><div class="kind">Projekt · ${p.status}</div><div class="t">${hl(p.name,q)}</div>${ms.map(s=>`<div class="small ${s.done?'muted':''}">${s.done?'✓':'○'} ${hl(s.text,q)}${s.done&&s.doneAt?` · ${fmt(iso(s.doneAt))}`:''}</div>`).join('')}</div>`});});
+  S.auftraege.forEach(a=>{const ms=a.schritte.filter(s=>has(s.text));if(has(a.name)||ms.length)hits.push({k:'Auftrag',html:`<div class="hit"><div class="kind">Auftrag · ${a.status}${a.erledigtAm?' · '+fmt(a.erledigtAm):a.termin?' · Termin '+fmt(a.termin):''}</div><div class="t">${hl(a.name,q)}</div>${ms.map(s=>`<div class="small ${s.done?'muted':''}">${s.done?'✓':'○'} ${hl(s.text,q)}</div>`).join('')}</div>`});});
+  S.eingang.forEach(e=>{if(has(e.text))hits.push({k:'Eingang',html:`<div class="hit"><div class="kind">Eingang</div><div class="t">${hl(e.text,q)}</div></div>`});});
+  out.innerHTML=hits.length?`<div class="muted small" style="margin:10px 0">${hits.length} Treffer</div>`+hits.map(h=>h.html).join(''):`<div class="empty">Nichts gefunden für „${esc(q)}“.</div>`;
+}
+
+/* ================= Sicherung ================= */
 function exportJson(){const b=new Blob([JSON.stringify(S,null,1)],{type:'application/json'});const u=URL.createObjectURL(b);const a=document.createElement('a');a.href=u;a.download=`tagwerk-${today()}.json`;a.click();setTimeout(()=>URL.revokeObjectURL(u),1000);}
-function importJson(inp){const f=inp.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{const d=JSON.parse(r.result);if(!d.projekte||!d.tage)throw 0;if(!confirm('Vorhandene Daten mit der Sicherung überschreiben?'))return;S=d;save();render();}catch(e){alert('Datei nicht lesbar.');}};r.readAsText(f);inp.value='';}
+function importJson(inp){const f=inp.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{const d=JSON.parse(r.result);if(!d.projekte||!d.tage)throw 0;if(!confirm('Vorhandene Daten mit der Sicherung überschreiben?'))return;localStorage.setItem(KEY,JSON.stringify(d));S=load();save();render();}catch(e){alert('Datei nicht lesbar.');}};r.readAsText(f);inp.value='';}
 
 render();
 </script>
