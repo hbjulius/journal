@@ -121,6 +121,8 @@ mark{background:#F2E38A;color:inherit;border-radius:2px}
   <div id="h-pakete"></div>
   <h2>Aufträge</h2>
   <div id="h-auftraege"></div>
+  <h2>Projekte <span class="count">nächster Schritt</span></h2>
+  <div id="h-projekte"></div>
   <h2>Tagesplan</h2>
   <div id="h-plan"></div>
   <h2>Feierabend</h2>
@@ -190,7 +192,7 @@ const fmt=d=>d?`${d.slice(8,10)}.${d.slice(5,7)}.`:'';
 const fmtLong=d=>{const x=new Date(d+'T12:00:00');return `${WT[x.getDay()]}, ${x.getDate()}. ${MON[x.getMonth()]} ${x.getFullYear()}`;};
 const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const emptyTask=()=>({text:'',bereich:'eigen',projektId:'',schrittId:'',done:false});
-let S=load(), open=new Set(), editPlan=false, editFb=false;
+let S=load(), expanded=new Set(), editPlan=false, editFb=false;
 
 function load(){
   let d=null;try{const r=localStorage.getItem(KEY);if(r)d=JSON.parse(r);}catch(e){}
@@ -260,7 +262,12 @@ function renderHeute(){
 
   /* Aufträge */
   const offen=S.auftraege.filter(a=>a.status==='offen').sort(byTermin);
-  document.getElementById('h-auftraege').innerHTML=cols(offen.filter(a=>a.bereich==='vater').map(a=>auftragZettel(a,true)),offen.filter(a=>a.bereich!=='vater').map(a=>auftragZettel(a,true)),'Keine offen');
+  const ov=offen.filter(a=>a.bereich==='vater'),oe=offen.filter(a=>a.bereich!=='vater'),more=n=>n>5?`<button class="link" onclick="show('auftraege')">+ ${n-5} weitere</button>`:'';
+  document.getElementById('h-auftraege').innerHTML=cols(ov.slice(0,5).map(a=>auftragZettel(a,true)).concat(more(ov.length)),oe.slice(0,5).map(a=>auftragZettel(a,true)).concat(more(oe.length)),'Keine offen');
+
+  /* Projekte */
+  const pz=p=>{const ns=nextStep(p);return `<div class="zettel ${p.bereich} open-h" onclick="expanded.add('${p.id}');show('projekte')"><div class="t">${esc(p.name)}</div><div class="prev">${ns?`<b>${esc(ns.text)}</b>`:'<span style="color:var(--alarm)">Kein Schritt eingetragen</span>'}</div></div>`;};
+  document.getElementById('h-projekte').innerHTML=cols(aktive().filter(p=>p.bereich==='vater').map(pz),aktive().filter(p=>p.bereich!=='vater').map(pz),'Kein aktives');
 
   /* Plan */
   const pl=document.getElementById('h-plan');
@@ -322,17 +329,17 @@ function stepsHtml(ownerId,s){
   return `<div class="steps">${list.length?list.map(x=>`<div class="step ${x.done?'done':''}"><button class="chk sm ${x.done?'on':''}" onclick="stepToggle('${ownerId}','${x.id}')">${x.done?'✓':''}</button><div class="st"><span class="tx">${esc(x.text)}</span>${x.done?`<span class="small muted"> · ${fmt(iso(x.doneAt||Date.now()))}</span>`:''}</div><button class="del" onclick="stepDel('${ownerId}','${x.id}')">×</button></div>`).join(''):`<div class="empty small">Noch keine Schritte.</div>`}
     <div class="addstep"><input id="ns-${ownerId}" placeholder="Nächster Schritt…" onkeydown="if(event.key==='Enter'){stepAdd('${ownerId}',this.value);}"><button class="btn sm" onclick="stepAdd('${ownerId}',document.getElementById('ns-${ownerId}').value)">+</button></div></div>`;
 }
-function stepAdd(ownerId,text){text=(text||'').trim();if(!text)return;const o=holder(ownerId);if(!o)return;o.schritte.push({id:uid(),text,done:false,ts:Date.now()});open.add(ownerId);save();render();const i=document.getElementById('ns-'+ownerId);if(i)i.focus();}
+function stepAdd(ownerId,text){text=(text||'').trim();if(!text)return;const o=holder(ownerId);if(!o)return;o.schritte.push({id:uid(),text,done:false,ts:Date.now()});expanded.add(ownerId);save();render();const i=document.getElementById('ns-'+ownerId);if(i)i.focus();}
 function stepToggle(ownerId,id){const o=holder(ownerId);const s=o.schritte.find(x=>x.id===id);s.done=!s.done;s.doneAt=s.done?Date.now():0;save();render();}
 function stepDel(ownerId,id){const o=holder(ownerId);if(!confirm('Schritt löschen?'))return;o.schritte=o.schritte.filter(x=>x.id!==id);save();render();}
-function toggleOpen(id){open.has(id)?open.delete(id):open.add(id);render();}
+function toggleOpen(id){expanded.has(id)?expanded.delete(id):expanded.add(id);render();}
 
 /* ================= AUFTRÄGE ================= */
 const byTermin=(a,b)=>(a.termin||'9')<(b.termin||'9')?-1:1;
 function auftragZettel(a,heute){
   const t=today();let cls='',txt=a.termin?fmt(a.termin):'ohne Termin';
   if(a.termin&&a.status==='offen'){if(a.termin<t){cls='over';txt='überfällig · '+txt;}else if(a.termin===t){cls='today';txt='heute';}}
-  const ns=nextStep(a),no=offene(a.schritte).length,nd=a.schritte.length-no,isOpen=open.has(a.id);
+  const ns=nextStep(a),no=offene(a.schritte).length,nd=a.schritte.length-no,isOpen=expanded.has(a.id);
   return `<div class="zettel ${a.bereich} ${a.status==='fertig'?'done':''}"><div class="row">
     <button class="chk ${a.status==='fertig'?'on':''}" onclick="auftragToggle('${a.id}')">${a.status==='fertig'?'✓':''}</button>
     <div class="grow open-h" onclick="toggleOpen('${a.id}')"><div class="t">${esc(a.name)}</div><div class="due ${cls}">${txt}</div>
@@ -363,7 +370,7 @@ function auftragDel(id){if(!confirm('Auftrag endgültig löschen?'))return;S.auf
 
 /* ================= PROJEKTE ================= */
 function projZettel(p){
-  const akt=p.status==='aktiv',ns=nextStep(p),no=offene(p.schritte).length,nd=p.schritte.length-no,isOpen=open.has(p.id);
+  const akt=p.status==='aktiv',ns=nextStep(p),no=offene(p.schritte).length,nd=p.schritte.length-no,isOpen=expanded.has(p.id);
   return `<div class="zettel ${p.bereich}"><div class="row">
     <div class="grow open-h" onclick="toggleOpen('${p.id}')"><div class="t" style="font-size:19px">${esc(p.name)}</div>
       ${!isOpen?(ns?`<div class="prev">Als nächstes: <b>${esc(ns.text)}</b></div>`:`<div class="prev">Kein offener Schritt</div>`)+`<div class="prev">${no} offen · ${nd} erledigt</div>`:''}</div>
@@ -390,7 +397,7 @@ function projSave(id,voll){
   const n=document.getElementById('p-name').value.trim();if(!n)return;
   if(id){const p=proj(id);p.name=n;p.bereich=segVal('p-seg');}
   else{const st=(document.getElementById('p-steps').value||'').split('\n').map(x=>x.trim()).filter(Boolean).map(text=>({id:uid(),text,done:false,ts:Date.now()}));
-    const np={id:uid(),name:n,bereich:segVal('p-seg'),status:voll?'eis':'aktiv',erstellt:today(),schritte:st};S.projekte.push(np);open.add(np.id);}
+    const np={id:uid(),name:n,bereich:segVal('p-seg'),status:voll?'eis':'aktiv',erstellt:today(),schritte:st};S.projekte.push(np);expanded.add(np.id);}
   save();closeSheet();render();
 }
 function projStatus(id,st){if(st==='aktiv'&&aktive().length>=MAX_AKTIV){alert(`Schon ${MAX_AKTIV} aktive Projekte. Leg erst eins auf Eis.`);return;}const p=proj(id);p.status=st;if(st==='fertig')p.fertigAm=today();save();render();}
