@@ -130,6 +130,7 @@ mark{background:#F2E38A;color:inherit;border-radius:2px}
   </div>
   <div id="h-pakete"></div>
   <div id="h-habits"></div>
+  <div id="h-termine"></div>
   <h2>Aufträge</h2>
   <div id="h-auftraege"></div>
   <h2>Projekte <span class="count">nächster Schritt</span></h2>
@@ -156,6 +157,10 @@ mark{background:#F2E38A;color:inherit;border-radius:2px}
   <div id="a-offen"></div>
   <button class="btn" onclick="openAuftragForm()">Neuer Auftrag</button>
   <details><summary>Erledigte anzeigen</summary><div id="a-fertig"></div></details>
+  <h2>To-dos <span class="count">ohne Kunde, ohne Projekt</span></h2>
+  <div id="t-offen"></div>
+  <button class="btn" onclick="openTodoForm()">Neues To-do</button>
+  <details><summary>Erledigte To-dos</summary><div id="t-fertig"></div></details>
 </section>
 
 
@@ -245,11 +250,12 @@ function load(){
     /* v2 -> v3: feste Slots je Bereich */
     if(!T.slots){T.slots=emptySlots();const put=(t,rolle)=>{if(!t||!t.text)return;const b=t.bereich==='vater'?'vater':'eigen';const keys=SLOTS.filter(x=>x[1]===b&&x[2]===rolle).map(x=>x[0]);const k=keys.find(k=>!T.slots[k].text)||keys[keys.length-1];T.slots[k]=Object.assign(emptyTask(b),t,{bereich:b});};
       put(T.haupt,'haupt');(T.neben||[]).forEach(n=>put(n,'neben'));delete T.haupt;delete T.neben;}});
-  if(!d.gewohnheiten)d.gewohnheiten=[];Object.values(d.tage).forEach(T=>{if(!T.habits)T.habits={};});
+  if(!d.gewohnheiten)d.gewohnheiten=[];if(!d.todos)d.todos=[];Object.values(d.tage).forEach(T=>{if(T.termine===undefined)T.termine='';if(T.todoId===undefined)T.todoId='';});Object.values(d.tage).forEach(T=>{if(!T.habits)T.habits={};});
   d.version=4;return d;
 }
 function save(){try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){alert('Speichern fehlgeschlagen. Läuft die App im privaten Modus?');}}
-function tag(d){return S.tage[d]||(S.tage[d]={slots:emptySlots(),habits:{},geschafft:'',gedauert:'',pakete:'',geplant:false,abgegeben:false});}
+function tag(d){return S.tage[d]||(S.tage[d]={slots:emptySlots(),habits:{},termine:'',todoId:'',geschafft:'',gedauert:'',pakete:'',geplant:false,abgegeben:false});}
+const todo=id=>S.todos.find(t=>t.id===id);const offeneTodos=()=>S.todos.filter(t=>t.status==='offen');
 const tasks=T=>SLOTS.map(([k])=>T.slots[k]).filter(t=>t.text);
 const aktive=()=>S.projekte.filter(p=>p.status==='aktiv'&&p.bereich!=='privat');
 const aktiveP=()=>S.projekte.filter(p=>p.status==='aktiv'&&p.bereich==='privat');
@@ -264,7 +270,7 @@ function sortedSteps(s){return offene(s).concat(s.filter(x=>x.done).sort((a,b)=>
 function show(v){document.querySelectorAll('.view').forEach(e=>e.classList.toggle('on',e.id==='v-'+v));document.querySelectorAll('.tabs button').forEach(b=>b.classList.toggle('on',b.dataset.v===v));window.scrollTo(0,0);render();}
 let mehrSub='privat';
 function showMehr(m){mehrSub=m;document.querySelectorAll('#v-mehr .sub button').forEach(b=>b.classList.toggle('on',b.dataset.m===m));document.querySelectorAll('#v-mehr .panel').forEach(p=>p.classList.toggle('on',p.id==='m-'+m));if(!document.getElementById('v-mehr').classList.contains('on'))show('mehr');}
-function render(){renderHeute();renderProjekte();renderPrivat();renderHabits();renderAuftraege();renderWoche();renderArchiv();}
+function render(){renderHeute();renderProjekte();renderPrivat();renderHabits();renderAuftraege();renderTodos();renderWoche();renderArchiv();}
 function openSheet(html){document.getElementById('sheet').innerHTML=html;document.getElementById('sheet-bg').classList.add('on');document.getElementById('sheet').classList.add('on');}
 function closeSheet(){document.getElementById('sheet-bg').classList.remove('on');document.getElementById('sheet').classList.remove('on');}
 function segHtml(id,val,a='Für Vater',b='Eigenes',va='vater',vb='eigen'){return `<div class="seg" id="${id}" data-val="${val}"><button class="${val===va?'on '+va:''}" onclick="segSet('${id}','${va}')">${a}</button><button class="${val===vb?'on '+vb:''}" onclick="segSet('${id}','${vb}')">${b}</button></div>`;}
@@ -280,7 +286,7 @@ function openEingang(){
   if(!S.eingang.length){openSheet(`<h3>Eingang</h3><p class="empty">Leer. Alles zugeordnet.</p>`);return;}
   openSheet(`<h3>Eingang</h3>`+S.eingang.map(e=>`<div class="zettel"><div class="t" style="margin-bottom:10px">${esc(e.text)}</div><div class="inline">
     <button class="btn sm" onclick="eingangZu('${e.id}','haupt')">Heute Haupt</button><button class="btn sm" onclick="eingangZu('${e.id}','neben')">Heute Neben</button>
-    <button class="btn sm" onclick="eingangZu('${e.id}','auftrag')">Auftrag</button><button class="btn sm" onclick="eingangZu('${e.id}','schritt')">Projektschritt</button>
+    <button class="btn sm" onclick="eingangZu('${e.id}','todo')">To-do</button><button class="btn sm" onclick="eingangZu('${e.id}','auftrag')">Auftrag</button><button class="btn sm" onclick="eingangZu('${e.id}','schritt')">Projektschritt</button>
     <button class="btn sm ghost" onclick="eingangDel('${e.id}')">Weg</button></div></div>`).join(''));
 }
 function eingangDel(id){S.eingang=S.eingang.filter(e=>e.id!==id);save();openEingang();render();}
@@ -288,6 +294,7 @@ function eingangZu(id,ziel){
   const e=S.eingang.find(x=>x.id===id);if(!e)return;const d=tag(today());
   if(ziel==='haupt'||ziel==='neben'){const keys=SLOTS.filter(x=>x[1]!=='privat'&&(ziel==='haupt'?x[2]==='haupt':x[2]==='neben')).map(x=>x[0]);const k=keys.find(k=>!d.slots[k].text)||keys[0];d.slots[k]=Object.assign(emptyTask(d.slots[k].bereich),{text:e.text});d.geplant=false;editPlan=true;}
   else if(ziel==='auftrag'){eingangDel(id);closeSheet();openAuftragForm(null,e.text);return;}
+  else if(ziel==='todo'){eingangDel(id);closeSheet();openTodoForm(e.text);return;}
   else if(ziel==='schritt'){eingangDel(id);closeSheet();openStepZiel(e.text);return;}
   eingangDel(id);closeSheet();show('heute');
 }
@@ -309,6 +316,9 @@ function renderHeute(){
   if(T.geplant&&!editPlan){pk.innerHTML=`<div class="pk ${T.pakete}"><div><b>Paketabgabe 15:00</b><div class="small muted">${T.pakete==='ja'?'Heute ja — vor 15 Uhr packen.':T.pakete==='nein'?'Heute nicht.':'Noch nicht entschieden.'}</div></div><button class="btn sm ghost" onclick="paketeToggle()">${T.pakete==='ja'?'Doch nicht':'Doch ja'}</button></div>`;}
   else pk.innerHTML='';
 
+  /* Termine */
+  document.getElementById('h-termine').innerHTML=T.geplant&&!editPlan&&T.termine?`<div class="form" style="margin-top:12px;padding:10px 14px"><div class="muted small">Termine</div><div style="white-space:pre-wrap;font-weight:600">${esc(T.termine)}</div></div>`:'';
+
   /* Gewohnheiten */
   const hb=S.gewohnheiten.filter(g=>g.status==='aktiv');
   document.getElementById('h-habits').innerHTML=hb.length?`<div class="hab">${hb.map(g=>{const on=!!T.habits[g.id];return `<button class="${on?'on':''}" onclick="habitToggle('${g.id}')"><span class="chk sm ${on?'on':''}">${on?'✓':''}</span>${esc(g.name)}<span class="streak">${streak(g.id)}</span></button>`;}).join('')}</div>`:'';
@@ -326,15 +336,19 @@ function renderHeute(){
   const pl=document.getElementById('h-plan');
   if(!T.geplant||editPlan){
     const side=b=>`<div class="colh ${b}">${BNAME[b]}</div>`+SLOTS.filter(x=>x[1]===b).map(([k,,rolle],i)=>`<label>${rolle==='haupt'?(b==='privat'?'Eine Sache nach Feierabend (optional)':'Das eine Ding heute'):'Nebenaufgabe '+i}</label>${taskForm(k,T.slots[k],b)}`).join('');
-    pl.innerHTML=`<div class="form" id="plan-form">${side('vater')}${side('eigen')}${side('privat')}
+    const ot=offeneTodos();
+    const todoSel=ot.length?`<label>Ein To-do heute <span class="muted small">(Pflicht, solange welche offen sind)</span></label><select id="pf-todo"><option value="">— wählen —</option>${ot.map(t=>`<option value="${t.id}" ${t.id===T.todoId?'selected':''}>${esc(t.text)}</option>`).join('')}</select>`:'';
+    pl.innerHTML=`<div class="form" id="plan-form"><label>Termine heute <span class="muted small">(aus dem Kalender abschreiben)</span></label><textarea id="pf-termine" style="min-height:52px" placeholder="10:00 Mosca Anruf&#10;14:30 Abholung">${esc(T.termine)}</textarea>
+      ${todoSel}${side('vater')}${side('eigen')}${side('privat')}
       <label>Paketabgabe 15:00</label>${segHtml('seg-pk',T.pakete||'nein','Ja, heute','Nein','ja','nein')}
       <div class="hint" style="margin-top:14px">Eine Seite darf leer bleiben. Pflicht ist eine Hauptaufgabe insgesamt.</div>
       <div style="margin-top:16px" class="stack"><button class="btn solid" onclick="planAbgeben()">Tag festlegen</button>${T.geplant?`<button class="btn ghost" onclick="editPlan=false;renderHeute()">Abbrechen</button>`:''}</div></div>`;
     SLOTS.forEach(([k])=>bindTaskForm(k));
   }else{
     const tv=b=>SLOTS.filter(x=>x[1]===b&&T.slots[x[0]].text).map(([k,,rolle])=>taskView(T.slots[k],b==='privat'?'neben':rolle,k));
-    const priv=tv('privat');
-    pl.innerHTML=cols(tv('vater'),tv('eigen'),'Nichts heute')+(priv.length?`<div class="colh privat" style="margin-top:6px">Privat · nach Feierabend</div>`+priv.join(''):'')+`<div style="text-align:right"><button class="link" onclick="editPlan=true;renderHeute()">Plan bearbeiten</button></div>`;
+    const priv=tv('privat'),td=todo(T.todoId);
+    const tdHtml=td?`<div class="zettel ${td.bereich} ${td.status==='fertig'?'done':''}" style="margin-top:6px"><div class="row"><button class="chk" onclick="todoToggle('${td.id}')">${td.status==='fertig'?'✓':''}</button><div class="grow"><div class="muted small">To-do des Tages</div><div class="t">${esc(td.text)}</div></div></div></div>`:'';
+    pl.innerHTML=cols(tv('vater'),tv('eigen'),'Nichts heute')+tdHtml+(priv.length?`<div class="colh privat" style="margin-top:6px">Privat · nach Feierabend</div>`+priv.join(''):'')+`<div style="text-align:right"><button class="link" onclick="editPlan=true;renderHeute()">Plan bearbeiten</button></div>`;
   }
 
   /* Feierabend */
@@ -360,6 +374,8 @@ function readTask(k,old,b){const text=document.getElementById('tf-'+k).value.tri
 function planAbgeben(){
   const T=tag(today());const neu={};SLOTS.forEach(([k,b])=>neu[k]=readTask(k,T.slots[k],b));
   if(!neu.vh.text&&!neu.eh.text){alert('Ohne Hauptaufgabe kein Plan. Mindestens eine — Vater oder Eigenes.');return;}
+  const ts=document.getElementById('pf-todo');if(ts&&!ts.value){alert('Ein To-do gehört heute dazu. Es sind welche offen.');return;}
+  T.todoId=ts?ts.value:'';T.termine=document.getElementById('pf-termine').value.trim();
   T.slots=neu;T.pakete=segVal('seg-pk');T.geplant=true;editPlan=false;save();render();
 }
 function taskView(t,kind,k){
@@ -420,6 +436,25 @@ function auftragSave(id){
 }
 function auftragToggle(id){const a=auftrag(id);if(a.status==='offen'&&offene(a.schritte).length&&!confirm(`Noch ${offene(a.schritte).length} Schritte offen. Trotzdem als fertig markieren?`))return;a.status=a.status==='offen'?'fertig':'offen';a.erledigtAm=a.status==='fertig'?today():'';save();render();}
 function auftragDel(id){if(!confirm('Auftrag endgültig löschen?'))return;S.auftraege=S.auftraege.filter(a=>a.id!==id);save();render();}
+
+/* ================= TO-DOS ================= */
+function todoZettel(t){return `<div class="zettel ${t.bereich} ${t.status==='fertig'?'done':''}"><div class="row"><button class="chk" onclick="todoToggle('${t.id}')">${t.status==='fertig'?'✓':''}</button><div class="grow"><div class="t">${esc(t.text)}</div>${t.erledigtAm?`<div class="prev">erledigt ${fmt(t.erledigtAm)}</div>`:''}</div>
+  <button class="btn sm ghost" onclick="openTodoForm(null,'${t.id}')">…</button></div></div>`;}
+function renderTodos(){
+  const o=offeneTodos(),f=S.todos.filter(t=>t.status==='fertig').sort((a,b)=>(b.erledigtAm||'')<(a.erledigtAm||'')?-1:1);
+  document.getElementById('t-offen').innerHTML=o.length?o.map(todoZettel).join(''):`<div class="empty">Nichts offen. Dann ist der Plan heute ohne To-do erlaubt.</div>`;
+  document.getElementById('t-fertig').innerHTML=f.length?f.slice(0,50).map(todoZettel).join(''):`<div class="empty">Noch nichts erledigt.</div>`;
+}
+function openTodoForm(text='',id=null){
+  const t=id?todo(id):{text:text||'',bereich:'eigen'};
+  openSheet(`<h3>${id?'To-do bearbeiten':'Neues To-do'}</h3><div class="stack"><input id="td-text" placeholder="Filament bestellen, Rechnung schreiben …" value="${esc(t.text)}">${segHtml('td-seg',t.bereich)}
+    <button class="btn solid" onclick="todoSave(${id?`'${id}'`:'null'})">${id?'Speichern':'Anlegen'}</button>${id?`<button class="btn ghost" onclick="todoDel('${id}')">Löschen</button>`:''}</div></div>`);
+  if(!id)setTimeout(()=>document.getElementById('td-text').focus(),250);
+}
+function todoSave(id){const n=document.getElementById('td-text').value.trim();if(!n)return;
+  if(id){const t=todo(id);t.text=n;t.bereich=segVal('td-seg');}else S.todos.push({id:uid(),text:n,bereich:segVal('td-seg'),status:'offen',erstellt:today()});save();closeSheet();render();}
+function todoToggle(id){const t=todo(id);t.status=t.status==='offen'?'fertig':'offen';t.erledigtAm=t.status==='fertig'?today():'';save();render();}
+function todoDel(id){if(!confirm('To-do löschen?'))return;S.todos=S.todos.filter(t=>t.id!==id);Object.values(S.tage).forEach(T=>{if(T.todoId===id)T.todoId='';});save();closeSheet();render();}
 
 /* ================= PROJEKTE ================= */
 function projZettel(p){
@@ -497,10 +532,11 @@ function renderWoche(){
     tasks(T).forEach(t=>{if(t.done){if(t.bereich==='privat')pv++;else t.bereich==='vater'?v++:e++;if(t.projektId)hits[t.projektId]=(hits[t.projektId]||0)+1;}});}
   S.projekte.forEach(p=>p.schritte.forEach(s=>{if(s.done&&s.doneAt&&(now-s.doneAt)/864e5<=14){if(p.bereich==='privat')pv++;else p.bereich==='vater'?v++:e++;hits[p.id]=(hits[p.id]||0)+1;}}));
   S.auftraege.filter(x=>x.status==='fertig'&&x.erledigtAm&&(now-new Date(x.erledigtAm))/864e5<=14).forEach(x=>x.bereich==='vater'?v++:e++);
+  S.todos.filter(x=>x.status==='fertig'&&x.erledigtAm&&(now-new Date(x.erledigtAm))/864e5<=14).forEach(x=>x.bereich==='vater'?v++:e++);
   const tot=v+e||1,hitHtml=Object.entries(hits).map(([id,n])=>{const p=proj(id);return p?`<div class="kv"><span>${esc(p.name)}</span><b>${n}</b></div>`:'';}).join('');
   const stale=aktive().filter(p=>!hits[p.id]&&(!p.erstellt||(now-new Date(p.erstellt))/864e5>=7));
   document.getElementById('w-stats').innerHTML=`<div class="row" style="justify-content:space-between"><span><span class="tag vater">Vater</span> ${v}</span><span>${e} <span class="tag eigen">Eigenes</span></span></div>
-    <div class="bar"><i class="v" style="width:${v/tot*100}%"></i><i class="e" style="width:${e/tot*100}%"></i></div><div class="muted small">Erledigte Aufgaben, Schritte und Aufträge nach Bereich</div>
+    <div class="bar"><i class="v" style="width:${v/tot*100}%"></i><i class="e" style="width:${e/tot*100}%"></i></div><div class="muted small">Erledigte Aufgaben, Schritte, Aufträge und To-dos nach Bereich</div>
     <div class="kv"><span>Tage mit Plan</span><b>${geplant} / 14</b></div><div class="kv"><span>Tage, an denen etwas länger dauerte</span><b>${laenger}</b></div><div class="kv"><span>Paketabgaben</span><b>${pk}</b></div><div class="kv"><span>Privat erledigt</span><b>${pv}</b></div>${S.gewohnheiten.filter(g=>g.status==='aktiv').map(g=>{let n=0;for(let i=0;i<14;i++){const d=new Date(now);d.setDate(now.getDate()-i);const T=S.tage[iso(d)];if(T&&T.habits&&T.habits[g.id])n++;}return `<div class="kv"><span>${esc(g.name)}</span><b>${n} / 14</b></div>`;}).join('')}
     ${hitHtml?`<div style="margin-top:12px;font-weight:700">Projekte mit Fortschritt</div>${hitHtml}`:''}
     ${stale.length?`<div class="hint" style="margin-top:12px">Ohne Fortschritt in 14 Tagen: ${stale.map(p=>esc(p.name)).join(', ')}. Eisfach?</div>`:''}`;
@@ -512,6 +548,7 @@ function dayHtml(d,T,q=''){
   const ts=tasks(T);
   return `<div class="day"><div class="dh"><span>${fmtLong(d)}</span><span class="small muted">${T.pakete==='ja'?'📦 15:00':''}</span></div>
     ${ts.length?`<ul>${SLOTS.filter(x=>T.slots[x[0]].text).map(([k,b,rolle])=>{const t=T.slots[k];return `<li class="${t.done?'d':'o'}">${rolle==='haupt'?'<b>':''}${hl(t.text,q)}${rolle==='haupt'?'</b>':''} <span class="tag ${b}" style="font-size:11px">${b==='vater'?'V':b==='eigen'?'E':'P'}</span></li>`;}).join('')}</ul>`:`<div class="q">Kein Plan</div>`}
+    ${T.termine?`<div class="q" style="white-space:pre-wrap">🕒 ${hl(T.termine,q)}</div>`:''}${T.todoId&&todo(T.todoId)?`<div class="q">${todo(T.todoId).status==='fertig'?'✓':'○'} To-do: ${hl(todo(T.todoId).text,q)}</div>`:''}
     ${T.habits&&Object.keys(T.habits).length?`<div class="q">✓ ${Object.keys(T.habits).map(id=>{const g=S.gewohnheiten.find(x=>x.id===id);return g?esc(g.name):'';}).filter(Boolean).join(' · ')}</div>`:''}
     ${T.geschafft?`<div class="q"><b>Fertig:</b> ${hl(T.geschafft,q)}</div>`:''}${T.gedauert?`<div class="q"><b>Länger:</b> ${hl(T.gedauert,q)}</div>`:''}</div>`;
 }
@@ -523,9 +560,10 @@ function renderArchiv(){
     let cur='',html='';days.forEach(d=>{const m=d.slice(0,7);if(m!==cur){cur=m;html+=`<div class="monat">${MON[+d.slice(5,7)-1]} ${d.slice(0,4)}</div>`;}html+=dayHtml(d,S.tage[d]);});out.innerHTML=html;return;
   }
   const hits=[];const has=s=>(s||'').toLowerCase().includes(ql);
-  Object.entries(S.tage).sort((a,b)=>a[0]<b[0]?1:-1).forEach(([d,T])=>{if(tasks(T).some(t=>has(t.text))||has(T.geschafft)||has(T.gedauert))hits.push({k:'Tag',d,html:dayHtml(d,T,q)});});
+  Object.entries(S.tage).sort((a,b)=>a[0]<b[0]?1:-1).forEach(([d,T])=>{if(tasks(T).some(t=>has(t.text))||has(T.geschafft)||has(T.gedauert)||has(T.termine))hits.push({k:'Tag',d,html:dayHtml(d,T,q)});});
   S.projekte.forEach(p=>{const ms=p.schritte.filter(s=>has(s.text));if(has(p.name)||ms.length)hits.push({k:'Projekt',html:`<div class="hit"><div class="kind">Projekt · ${p.status}</div><div class="t">${hl(p.name,q)}</div>${ms.map(s=>`<div class="small ${s.done?'muted':''}">${s.done?'✓':'○'} ${hl(s.text,q)}${s.done&&s.doneAt?` · ${fmt(iso(s.doneAt))}`:''}</div>`).join('')}</div>`});});
   S.auftraege.forEach(a=>{const ms=a.schritte.filter(s=>has(s.text));if(has(a.name)||ms.length)hits.push({k:'Auftrag',html:`<div class="hit"><div class="kind">Auftrag · ${a.status}${a.erledigtAm?' · '+fmt(a.erledigtAm):a.termin?' · Termin '+fmt(a.termin):''}</div><div class="t">${hl(a.name,q)}</div>${ms.map(s=>`<div class="small ${s.done?'muted':''}">${s.done?'✓':'○'} ${hl(s.text,q)}</div>`).join('')}</div>`});});
+  S.todos.forEach(t=>{if(has(t.text))hits.push({k:'To-do',html:`<div class="hit"><div class="kind">To-do · ${t.status}${t.erledigtAm?' · '+fmt(t.erledigtAm):''}</div><div class="t">${hl(t.text,q)}</div></div>`});});
   S.eingang.forEach(e=>{if(has(e.text))hits.push({k:'Eingang',html:`<div class="hit"><div class="kind">Eingang</div><div class="t">${hl(e.text,q)}</div></div>`});});
   out.innerHTML=hits.length?`<div class="muted small" style="margin:10px 0">${hits.length} Treffer</div>`+hits.map(h=>h.html).join(''):`<div class="empty">Nichts gefunden für „${esc(q)}“.</div>`;
 }
