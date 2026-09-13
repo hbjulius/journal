@@ -14,7 +14,7 @@
 <style>
 :root{
   --paper:#E9E8E3; --panel:#FBFBF9; --ink:#1E2022; --ink2:#5A5D60; --line:#CFCFC8; --soft:#F1F1ED;
-  --vater:#24506E; --eigen:#5E6E2A; --alarm:#B4342A; --ok:#3E7A4F; --tap:56px;
+  --vater:#24506E; --eigen:#5E6E2A; --privat:#5D4B7A; --alarm:#B4342A; --ok:#3E7A4F; --tap:56px;
 }
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 html,body{background:var(--paper);color:var(--ink);font-family:-apple-system,"SF Pro Text",system-ui,Segoe UI,Roboto,sans-serif;font-size:17px;line-height:1.35;-webkit-text-size-adjust:100%}
@@ -35,10 +35,10 @@ h2 .count{font-size:15px;font-weight:600;color:var(--ink2)}
 .pill{display:inline-flex;align-items:center;gap:6px;border:1.5px solid var(--ink);border-radius:999px;padding:8px 14px;font-weight:600;min-height:40px;white-space:nowrap}
 .pill.alarm{border-color:var(--alarm);color:var(--alarm)}
 .zettel{background:var(--panel);border:1.5px solid var(--line);border-left-width:8px;border-radius:6px;padding:12px 14px;margin-bottom:10px;position:relative}
-.zettel.vater{border-left-color:var(--vater)}.zettel.eigen{border-left-color:var(--eigen)}
+.zettel.vater{border-left-color:var(--vater)}.zettel.eigen{border-left-color:var(--eigen)}.zettel.privat{border-left-color:var(--privat)}
 .zettel.done{opacity:.55}.zettel.done>.row .t{text-decoration:line-through}
 .zettel.haupt{border-width:2.5px;border-color:var(--ink);border-left-width:8px}
-.zettel.haupt.vater{border-left-color:var(--vater)}.zettel.haupt.eigen{border-left-color:var(--eigen)}
+.zettel.haupt.vater{border-left-color:var(--vater)}.zettel.haupt.eigen{border-left-color:var(--eigen)}.zettel.haupt.privat{border-left-color:var(--privat)}
 .row{display:flex;align-items:center;gap:12px}
 .grow{flex:1;min-width:0}
 .t{font-weight:600;word-break:break-word}
@@ -47,7 +47,7 @@ h2 .count{font-size:15px;font-weight:600;color:var(--ink2)}
 .chk.on{background:var(--ink);color:var(--panel)}
 .chk.sm{width:28px;height:28px;font-size:16px;border-radius:6px}
 .tag{font-size:13px;font-weight:600;padding:2px 8px;border-radius:4px;color:#fff;display:inline-block;vertical-align:middle}
-.tag.vater{background:var(--vater)}.tag.eigen{background:var(--eigen)}
+.tag.vater{background:var(--vater)}.tag.eigen{background:var(--eigen)}.tag.privat{background:var(--privat)}
 .due{font-size:14px;font-weight:600}.due.over{color:var(--alarm)}.due.today{color:var(--ok)}
 .btn{min-height:var(--tap);border-radius:10px;padding:0 18px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;gap:8px;width:100%;border:2px solid var(--ink)}
 .btn.solid{background:var(--ink);color:var(--paper)}
@@ -102,11 +102,21 @@ details summary::-webkit-details-marker{display:none}
 mark{background:#F2E38A;color:inherit;border-radius:2px}
 .cols{display:grid;grid-template-columns:1fr 1fr;gap:10px;align-items:start}
 .colh{font-weight:800;font-size:15px;padding:6px 0 8px;border-bottom:3px solid;margin-bottom:8px}
-.colh.vater{border-color:var(--vater);color:var(--vater)}.colh.eigen{border-color:var(--eigen);color:var(--eigen)}
+.colh.vater{border-color:var(--vater);color:var(--vater)}.colh.eigen{border-color:var(--eigen);color:var(--eigen)}.colh.privat{border-color:var(--privat);color:var(--privat)}
+.form .colh{margin-top:18px}.form .colh:first-child{margin-top:0}
 .cols .zettel{padding:10px 10px 10px 10px;border-left-width:6px;font-size:15px}
 .cols .zettel .row{gap:8px}.cols .chk{width:28px;height:28px;font-size:16px;border-radius:6px}
 .cols .t{hyphens:auto;-webkit-hyphens:auto}.cols .t.big{font-size:17px}.cols .due{font-size:13px}.cols .prev{font-size:13px}.cols .arrow{display:none}
 .cols .empty{font-size:14px;padding:8px 2px}
+.hab{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.hab button{display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:0 12px 0 8px;border:2px solid var(--ink);border-radius:10px;font-weight:700;font-size:15px}
+.hab button.on{background:var(--ink);color:var(--paper)}
+.hab .chk.sm{border-width:2px}.hab button.on .chk.sm{border-color:var(--paper);color:var(--paper)}
+.hab .streak{font-weight:600;font-size:13px;opacity:.75}
+.sub{display:flex;gap:6px;margin:14px 0 18px;overflow:auto;-webkit-overflow-scrolling:touch}
+.sub button{flex:none;min-height:44px;padding:0 14px;border-radius:999px;border:1.5px solid var(--line);font-weight:700;font-size:15px;color:var(--ink2)}
+.sub button.on{border-color:var(--ink);color:var(--ink);background:var(--panel)}
+.panel{display:none}.panel.on{display:block}
 .pk{display:flex;align-items:center;justify-content:space-between;gap:10px;background:var(--panel);border:1.5px solid var(--line);border-radius:8px;padding:10px 14px;margin-top:12px}
 .pk.ja{border-color:var(--ink);border-width:2px}.pk.nein{opacity:.6}
 </style>
@@ -119,6 +129,7 @@ mark{background:#F2E38A;color:inherit;border-radius:2px}
     <button class="pill" id="h-eingang" onclick="openEingang()">Eingang · 0</button>
   </div>
   <div id="h-pakete"></div>
+  <div id="h-habits"></div>
   <h2>Aufträge</h2>
   <div id="h-auftraege"></div>
   <h2>Projekte <span class="count">nächster Schritt</span></h2>
@@ -147,6 +158,8 @@ mark{background:#F2E38A;color:inherit;border-radius:2px}
   <details><summary>Erledigte anzeigen</summary><div id="a-fertig"></div></details>
 </section>
 
+
+
 <section class="view" id="v-woche">
   <div class="head"><h1 id="w-kw">Woche</h1></div>
   <h2>Nächster Schritt je Projekt</h2>
@@ -155,26 +168,51 @@ mark{background:#F2E38A;color:inherit;border-radius:2px}
   <div id="w-termine"></div>
   <h2>Letzte 14 Tage</h2>
   <div class="form" id="w-stats"></div>
-  <h2>Daten</h2>
-  <div class="inline">
-    <button class="btn sm" onclick="exportJson()">Sicherung speichern</button>
-    <label class="btn sm" style="cursor:pointer">Sicherung laden<input type="file" accept="application/json" style="display:none" onchange="importJson(this)"></label>
-  </div>
-  <p class="muted small" style="margin-top:10px">Die Daten liegen nur auf diesem Gerät. Einmal die Woche sichern.</p>
 </section>
 
-<section class="view" id="v-archiv">
-  <div class="head"><h1>Archiv</h1></div>
-  <div style="margin-top:14px"><input id="s-q" type="search" placeholder="Suchen: Aufgabe, Projekt, Auftrag, Idee…" oninput="renderArchiv()"></div>
-  <div id="s-out"></div>
+<section class="view" id="v-mehr">
+  <div class="head"><h1 id="m-title">Mehr</h1></div>
+  <div class="sub">
+    <button data-m="privat" onclick="showMehr('privat')">Privat</button>
+    <button data-m="gewohnheiten" onclick="showMehr('gewohnheiten')">Gewohnheiten</button>
+    <button data-m="archiv" onclick="showMehr('archiv')">Archiv</button>
+    <button data-m="daten" onclick="showMehr('daten')">Daten</button>
+  </div>
+  <div class="panel" id="m-privat">
+    <div class="row" style="justify-content:space-between;margin-bottom:12px"><h2 style="margin:0">Private Projekte</h2><span class="pill" id="pp-count"></span></div>
+    <div id="pp-aktiv"></div>
+    <button class="btn" onclick="openProjektForm(null,true)">Neues privates Projekt</button>
+    <details><summary>Eisfach anzeigen</summary><div id="pp-eis"></div></details>
+    <details><summary>Abgeschlossene anzeigen</summary><div id="pp-fertig"></div></details>
+  </div>
+  <div class="panel" id="m-gewohnheiten">
+    <div class="row" style="justify-content:space-between;margin-bottom:12px"><h2 style="margin:0">Gewohnheiten</h2><span class="pill" id="g-count"></span></div>
+    <div id="g-list"></div>
+    <button class="btn" onclick="openHabitForm()">Neue Gewohnheit</button>
+    <p class="muted small" style="margin-top:10px">Nur Sachen, die du aufbauen willst. Was du sowieso tust, gehört nicht hierher.</p>
+  </div>
+  <div class="panel" id="m-archiv">
+    <input id="s-q" type="search" placeholder="Suchen: Aufgabe, Projekt, Auftrag, Idee…" oninput="renderArchiv()">
+    <div id="s-out"></div>
+  </div>
+  <div class="panel" id="m-daten">
+    <h2 style="margin-top:0">Sicherung</h2>
+    <div class="inline">
+      <button class="btn sm" onclick="exportJson()">Sicherung speichern</button>
+      <label class="btn sm" style="cursor:pointer">Sicherung laden<input type="file" accept="application/json" style="display:none" onchange="importJson(this)"></label>
+    </div>
+    <p class="muted small" style="margin-top:10px">Die Daten liegen nur auf diesem Gerät. Einmal die Woche sichern — am besten als eigene Gewohnheit.</p>
+  </div>
 </section>
+
+
 
 <nav class="tabs">
   <button class="on" data-v="heute" onclick="show('heute')"><span class="ico">▣</span>Heute</button>
   <button data-v="projekte" onclick="show('projekte')"><span class="ico">◆</span>Projekte</button>
   <button data-v="auftraege" onclick="show('auftraege')"><span class="ico">≡</span>Aufträge</button>
   <button data-v="woche" onclick="show('woche')"><span class="ico">▦</span>Woche</button>
-  <button data-v="archiv" onclick="show('archiv')"><span class="ico">⌕</span>Archiv</button>
+  <button data-v="mehr" onclick="show('mehr')"><span class="ico">⋯</span>Mehr</button>
 </nav>
 <button class="fab" onclick="openQuick()" aria-label="Schnell erfassen">+</button>
 <div class="sheet-bg" id="sheet-bg" onclick="closeSheet()"></div>
@@ -182,7 +220,9 @@ mark{background:#F2E38A;color:inherit;border-radius:2px}
 
 <script>
 /* ================= Daten ================= */
-const KEY='tagwerk-v1', MAX_AKTIV=3;
+const KEY='tagwerk-v1', MAX_AKTIV=3, MAX_PRIVAT=2, MAX_HABITS=5;
+const SLOTS=[['vh','vater','haupt'],['vn0','vater','neben'],['vn1','vater','neben'],['eh','eigen','haupt'],['en0','eigen','neben'],['en1','eigen','neben'],['ph','privat','haupt']];
+const BNAME={vater:'Für Vater',eigen:'Eigenes',privat:'Privat'};
 const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,6);
 const iso=d=>{const x=new Date(d);x.setMinutes(x.getMinutes()-x.getTimezoneOffset());return x.toISOString().slice(0,10);};
 const today=()=>iso(new Date());
@@ -191,7 +231,8 @@ const MON=['Januar','Februar','März','April','Mai','Juni','Juli','August','Sept
 const fmt=d=>d?`${d.slice(8,10)}.${d.slice(5,7)}.`:'';
 const fmtLong=d=>{const x=new Date(d+'T12:00:00');return `${WT[x.getDay()]}, ${x.getDate()}. ${MON[x.getMonth()]} ${x.getFullYear()}`;};
 const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-const emptyTask=()=>({text:'',bereich:'eigen',projektId:'',schrittId:'',done:false});
+const emptyTask=(bereich='eigen')=>({text:'',bereich,projektId:'',schrittId:'',done:false});
+const emptySlots=()=>Object.fromEntries(SLOTS.map(([k,b])=>[k,emptyTask(b)]));
 let S=load(), expanded=new Set(), editPlan=false, editFb=false;
 
 function load(){
@@ -200,12 +241,19 @@ function load(){
   /* Migration v1 -> v2 */
   d.projekte.forEach(p=>{if(!p.schritte){p.schritte=[];if(p.naechster)p.schritte.push({id:uid(),text:p.naechster,done:false,ts:Date.now()});delete p.naechster;}});
   d.auftraege.forEach(a=>{if(!a.schritte)a.schritte=[];});
-  Object.values(d.tage).forEach(T=>{if(T.geplant===undefined)T.geplant=!!(T.haupt&&T.haupt.text);if(T.abgegeben===undefined)T.abgegeben=!!(T.geschafft||T.gedauert);if(T.pakete===undefined)T.pakete='';});
-  d.version=2;return d;
+  Object.values(d.tage).forEach(T=>{if(T.geplant===undefined)T.geplant=!!(T.haupt&&T.haupt.text);if(T.abgegeben===undefined)T.abgegeben=!!(T.geschafft||T.gedauert);if(T.pakete===undefined)T.pakete='';
+    /* v2 -> v3: feste Slots je Bereich */
+    if(!T.slots){T.slots=emptySlots();const put=(t,rolle)=>{if(!t||!t.text)return;const b=t.bereich==='vater'?'vater':'eigen';const keys=SLOTS.filter(x=>x[1]===b&&x[2]===rolle).map(x=>x[0]);const k=keys.find(k=>!T.slots[k].text)||keys[keys.length-1];T.slots[k]=Object.assign(emptyTask(b),t,{bereich:b});};
+      put(T.haupt,'haupt');(T.neben||[]).forEach(n=>put(n,'neben'));delete T.haupt;delete T.neben;}});
+  if(!d.gewohnheiten)d.gewohnheiten=[];Object.values(d.tage).forEach(T=>{if(!T.habits)T.habits={};});
+  d.version=4;return d;
 }
 function save(){try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){alert('Speichern fehlgeschlagen. Läuft die App im privaten Modus?');}}
-function tag(d){return S.tage[d]||(S.tage[d]={haupt:emptyTask(),neben:[emptyTask(),emptyTask()],geschafft:'',gedauert:'',pakete:'',geplant:false,abgegeben:false});}
-const aktive=()=>S.projekte.filter(p=>p.status==='aktiv');
+function tag(d){return S.tage[d]||(S.tage[d]={slots:emptySlots(),habits:{},geschafft:'',gedauert:'',pakete:'',geplant:false,abgegeben:false});}
+const tasks=T=>SLOTS.map(([k])=>T.slots[k]).filter(t=>t.text);
+const aktive=()=>S.projekte.filter(p=>p.status==='aktiv'&&p.bereich!=='privat');
+const aktiveP=()=>S.projekte.filter(p=>p.status==='aktiv'&&p.bereich==='privat');
+const aktiveB=b=>S.projekte.filter(p=>p.status==='aktiv'&&p.bereich===b);
 const proj=id=>S.projekte.find(p=>p.id===id);
 const auftrag=id=>S.auftraege.find(a=>a.id===id);
 const offene=s=>s.filter(x=>!x.done);
@@ -214,13 +262,15 @@ function sortedSteps(s){return offene(s).concat(s.filter(x=>x.done).sort((a,b)=>
 
 /* ================= Navigation / Sheet ================= */
 function show(v){document.querySelectorAll('.view').forEach(e=>e.classList.toggle('on',e.id==='v-'+v));document.querySelectorAll('.tabs button').forEach(b=>b.classList.toggle('on',b.dataset.v===v));window.scrollTo(0,0);render();}
-function render(){renderHeute();renderProjekte();renderAuftraege();renderWoche();renderArchiv();}
+let mehrSub='privat';
+function showMehr(m){mehrSub=m;document.querySelectorAll('#v-mehr .sub button').forEach(b=>b.classList.toggle('on',b.dataset.m===m));document.querySelectorAll('#v-mehr .panel').forEach(p=>p.classList.toggle('on',p.id==='m-'+m));if(!document.getElementById('v-mehr').classList.contains('on'))show('mehr');}
+function render(){renderHeute();renderProjekte();renderPrivat();renderHabits();renderAuftraege();renderWoche();renderArchiv();}
 function openSheet(html){document.getElementById('sheet').innerHTML=html;document.getElementById('sheet-bg').classList.add('on');document.getElementById('sheet').classList.add('on');}
 function closeSheet(){document.getElementById('sheet-bg').classList.remove('on');document.getElementById('sheet').classList.remove('on');}
 function segHtml(id,val,a='Für Vater',b='Eigenes',va='vater',vb='eigen'){return `<div class="seg" id="${id}" data-val="${val}"><button class="${val===va?'on '+va:''}" onclick="segSet('${id}','${va}')">${a}</button><button class="${val===vb?'on '+vb:''}" onclick="segSet('${id}','${vb}')">${b}</button></div>`;}
 function segSet(id,val){const s=document.getElementById(id);s.dataset.val=val;const [b1,b2]=s.children;const v1=b1.getAttribute('onclick').match(/'([^']+)'\)$/)[1];b1.className=val===v1?'on '+v1:'';b2.className=val!==v1?'on '+val:'';}
 const segVal=id=>document.getElementById(id).dataset.val;
-function projSelect(id,val){return `<select id="${id}"><option value="">Kein Projekt</option>${aktive().map(p=>`<option value="${p.id}" ${p.id===val?'selected':''}>${esc(p.name)}</option>`).join('')}</select>`;}
+function projSelect(id,val,bereich){const ps=bereich?aktiveB(bereich):aktive();return `<select id="${id}"><option value="">Kein Projekt</option>${ps.map(p=>`<option value="${p.id}" ${p.id===val?'selected':''}>${esc(p.name)}</option>`).join('')}</select>`;}
 function stepSelect(id,projektId,val){const p=proj(projektId);const st=p?offene(p.schritte):[];return `<select id="${id}" ${st.length?'':'disabled'}><option value="">${st.length?'Freier Text / kein Schritt':'Projekt hat keine offenen Schritte'}</option>${st.map(s=>`<option value="${s.id}" ${s.id===val?'selected':''}>${esc(s.text)}</option>`).join('')}</select>`;}
 
 /* ================= Eingang ================= */
@@ -236,8 +286,7 @@ function openEingang(){
 function eingangDel(id){S.eingang=S.eingang.filter(e=>e.id!==id);save();openEingang();render();}
 function eingangZu(id,ziel){
   const e=S.eingang.find(x=>x.id===id);if(!e)return;const d=tag(today());
-  if(ziel==='haupt'){d.haupt=Object.assign(emptyTask(),{text:e.text});d.geplant=false;editPlan=true;}
-  else if(ziel==='neben'){const slot=d.neben.find(n=>!n.text)||d.neben[1];Object.assign(slot,emptyTask(),{text:e.text});d.geplant=false;editPlan=true;}
+  if(ziel==='haupt'||ziel==='neben'){const keys=SLOTS.filter(x=>x[1]!=='privat'&&(ziel==='haupt'?x[2]==='haupt':x[2]==='neben')).map(x=>x[0]);const k=keys.find(k=>!d.slots[k].text)||keys[0];d.slots[k]=Object.assign(emptyTask(d.slots[k].bereich),{text:e.text});d.geplant=false;editPlan=true;}
   else if(ziel==='auftrag'){eingangDel(id);closeSheet();openAuftragForm(null,e.text);return;}
   else if(ziel==='schritt'){eingangDel(id);closeSheet();openStepZiel(e.text);return;}
   eingangDel(id);closeSheet();show('heute');
@@ -260,6 +309,10 @@ function renderHeute(){
   if(T.geplant&&!editPlan){pk.innerHTML=`<div class="pk ${T.pakete}"><div><b>Paketabgabe 15:00</b><div class="small muted">${T.pakete==='ja'?'Heute ja — vor 15 Uhr packen.':T.pakete==='nein'?'Heute nicht.':'Noch nicht entschieden.'}</div></div><button class="btn sm ghost" onclick="paketeToggle()">${T.pakete==='ja'?'Doch nicht':'Doch ja'}</button></div>`;}
   else pk.innerHTML='';
 
+  /* Gewohnheiten */
+  const hb=S.gewohnheiten.filter(g=>g.status==='aktiv');
+  document.getElementById('h-habits').innerHTML=hb.length?`<div class="hab">${hb.map(g=>{const on=!!T.habits[g.id];return `<button class="${on?'on':''}" onclick="habitToggle('${g.id}')"><span class="chk sm ${on?'on':''}">${on?'✓':''}</span>${esc(g.name)}<span class="streak">${streak(g.id)}</span></button>`;}).join('')}</div>`:'';
+
   /* Aufträge */
   const offen=S.auftraege.filter(a=>a.status==='offen').sort(byTermin);
   const ov=offen.filter(a=>a.bereich==='vater'),oe=offen.filter(a=>a.bereich!=='vater'),more=n=>n>5?`<button class="link" onclick="show('auftraege')">+ ${n-5} weitere</button>`:'';
@@ -272,16 +325,16 @@ function renderHeute(){
   /* Plan */
   const pl=document.getElementById('h-plan');
   if(!T.geplant||editPlan){
-    pl.innerHTML=`<div class="form" id="plan-form">
-      <label>Das eine Ding heute</label>${taskForm('h',T.haupt)}
-      <label>Nebenaufgabe 1</label>${taskForm('n0',T.neben[0])}
-      <label>Nebenaufgabe 2</label>${taskForm('n1',T.neben[1])}
+    const side=b=>`<div class="colh ${b}">${BNAME[b]}</div>`+SLOTS.filter(x=>x[1]===b).map(([k,,rolle],i)=>`<label>${rolle==='haupt'?(b==='privat'?'Eine Sache nach Feierabend (optional)':'Das eine Ding heute'):'Nebenaufgabe '+i}</label>${taskForm(k,T.slots[k],b)}`).join('');
+    pl.innerHTML=`<div class="form" id="plan-form">${side('vater')}${side('eigen')}${side('privat')}
       <label>Paketabgabe 15:00</label>${segHtml('seg-pk',T.pakete||'nein','Ja, heute','Nein','ja','nein')}
+      <div class="hint" style="margin-top:14px">Eine Seite darf leer bleiben. Pflicht ist eine Hauptaufgabe insgesamt.</div>
       <div style="margin-top:16px" class="stack"><button class="btn solid" onclick="planAbgeben()">Tag festlegen</button>${T.geplant?`<button class="btn ghost" onclick="editPlan=false;renderHeute()">Abbrechen</button>`:''}</div></div>`;
-    ['h','n0','n1'].forEach(k=>bindTaskForm(k));
+    SLOTS.forEach(([k])=>bindTaskForm(k));
   }else{
-    const all=[[T.haupt,'haupt',0],[T.neben[0],'neben',0],[T.neben[1],'neben',1]].filter(x=>x[0].text);
-    pl.innerHTML=cols(all.filter(x=>x[0].bereich==='vater').map(x=>taskView(...x)),all.filter(x=>x[0].bereich!=='vater').map(x=>taskView(...x)),'Nichts heute')+`<div style="text-align:right"><button class="link" onclick="editPlan=true;renderHeute()">Plan bearbeiten</button></div>`;
+    const tv=b=>SLOTS.filter(x=>x[1]===b&&T.slots[x[0]].text).map(([k,,rolle])=>taskView(T.slots[k],b==='privat'?'neben':rolle,k));
+    const priv=tv('privat');
+    pl.innerHTML=cols(tv('vater'),tv('eigen'),'Nichts heute')+(priv.length?`<div class="colh privat" style="margin-top:6px">Privat · nach Feierabend</div>`+priv.join(''):'')+`<div style="text-align:right"><button class="link" onclick="editPlan=true;renderHeute()">Plan bearbeiten</button></div>`;
   }
 
   /* Feierabend */
@@ -296,26 +349,26 @@ function renderHeute(){
   }
 }
 function cols(v,e,leer){return `<div class="cols"><div><div class="colh vater">Für Vater</div>${v.length?v.join(''):`<div class="empty">${leer}</div>`}</div><div><div class="colh eigen">Eigenes</div>${e.length?e.join(''):`<div class="empty">${leer}</div>`}</div></div>`;}
-function taskForm(k,t){return `<div class="stack"><textarea id="tf-${k}" placeholder="${k==='h'?'Wenn nur das fertig wird, war der Tag gut.':'Optional'}">${esc(t.text)}</textarea>${segHtml('seg-'+k,t.bereich)}${projSelect('sel-'+k,t.projektId)}<div id="stw-${k}">${stepSelect('st-'+k,t.projektId,t.schrittId)}</div></div>`;}
+function taskForm(k,t,b){return `<div class="stack"><textarea id="tf-${k}" style="min-height:52px" placeholder="${k.endsWith('h')&&b!=='privat'?'Wenn nur das fertig wird, war der Tag gut.':'Optional'}">${esc(t.text)}</textarea>${projSelect('sel-'+k,t.projektId,b)}<div id="stw-${k}">${stepSelect('st-'+k,t.projektId,t.schrittId)}</div></div>`;}
 function bindTaskForm(k){
   const sel=document.getElementById('sel-'+k);
-  sel.addEventListener('change',()=>{const p=proj(sel.value);if(p)segSet('seg-'+k,p.bereich);document.getElementById('stw-'+k).innerHTML=stepSelect('st-'+k,sel.value,'');bindStep(k);});
+  sel.addEventListener('change',()=>{document.getElementById('stw-'+k).innerHTML=stepSelect('st-'+k,sel.value,'');bindStep(k);});
   bindStep(k);
 }
 function bindStep(k){const st=document.getElementById('st-'+k);st.addEventListener('change',()=>{const p=proj(document.getElementById('sel-'+k).value);const s=p&&p.schritte.find(x=>x.id===st.value);const ta=document.getElementById('tf-'+k);if(s&&!ta.value.trim())ta.value=s.text;});}
-function readTask(k,old){return {text:document.getElementById('tf-'+k).value.trim(),bereich:segVal('seg-'+k),projektId:document.getElementById('sel-'+k).value,schrittId:document.getElementById('st-'+k).value,done:old.done||false,doneAt:old.doneAt};}
+function readTask(k,old,b){const text=document.getElementById('tf-'+k).value.trim();return {text,bereich:b,projektId:document.getElementById('sel-'+k).value,schrittId:document.getElementById('st-'+k).value,done:text&&text===old.text?(old.done||false):false,doneAt:text&&text===old.text?old.doneAt:''};}
 function planAbgeben(){
-  const T=tag(today());const h=readTask('h',T.haupt);
-  if(!h.text){alert('Ohne Hauptaufgabe kein Plan. Eins muss es sein.');return;}
-  T.haupt=h;T.neben=[readTask('n0',T.neben[0]),readTask('n1',T.neben[1])];T.pakete=segVal('seg-pk');T.geplant=true;editPlan=false;save();render();
+  const T=tag(today());const neu={};SLOTS.forEach(([k,b])=>neu[k]=readTask(k,T.slots[k],b));
+  if(!neu.vh.text&&!neu.eh.text){alert('Ohne Hauptaufgabe kein Plan. Mindestens eine — Vater oder Eigenes.');return;}
+  T.slots=neu;T.pakete=segVal('seg-pk');T.geplant=true;editPlan=false;save();render();
 }
-function taskView(t,kind,i){
+function taskView(t,kind,k){
   const p=proj(t.projektId);
-  return `<div class="zettel ${t.bereich} ${kind==='haupt'?'haupt':''} ${t.done?'done':''}"><div class="row"><button class="chk" onclick="taskToggle('${kind}',${i})">${t.done?'✓':''}</button>
+  return `<div class="zettel ${t.bereich} ${kind==='haupt'?'haupt':''} ${t.done?'done':''}"><div class="row"><button class="chk" onclick="taskToggle('${k}')">${t.done?'✓':''}</button>
     <div class="grow"><div class="t ${kind==='haupt'?'big':''}">${esc(t.text)}</div>${p?`<div class="prev">${esc(p.name)}</div>`:''}</div></div></div>`;
 }
-function taskToggle(kind,i){
-  const T=tag(today());const t=kind==='haupt'?T.haupt:T.neben[i];t.done=!t.done;t.doneAt=t.done?today():'';
+function taskToggle(k){
+  const T=tag(today());const t=T.slots[k];t.done=!t.done;t.doneAt=t.done?today():'';
   if(t.schrittId){const p=proj(t.projektId);const s=p&&p.schritte.find(x=>x.id===t.schrittId);if(s){s.done=t.done;s.doneAt=t.done?Date.now():0;}}
   save();render();
 }
@@ -379,17 +432,25 @@ function projZettel(p){
       ${akt?`<button class="btn sm ghost" onclick="projStatus('${p.id}','eis')">Auf Eis</button><button class="btn sm ghost" onclick="projStatus('${p.id}','fertig')">Abgeschlossen</button>`
       :`<button class="btn sm" onclick="projStatus('${p.id}','aktiv')">Aktivieren</button><button class="btn sm ghost" onclick="projDel('${p.id}')">Löschen</button>`}</div>`:''}</div>`;
 }
+function renderPrivat(){
+  const a=aktiveP(),e=S.projekte.filter(p=>p.status==='eis'&&p.bereich==='privat'),f=S.projekte.filter(p=>p.status==='fertig'&&p.bereich==='privat');
+  const c=document.getElementById('pp-count');c.textContent=`${a.length} / ${MAX_PRIVAT} aktiv`;c.classList.toggle('alarm',a.length>=MAX_PRIVAT);
+  document.getElementById('pp-aktiv').innerHTML=a.length?a.map(projZettel).join(''):`<div class="hint">Käfer, Scheune, was auch immer — zwei private Projekte dürfen gleichzeitig laufen. Die tauchen im Tagesplan nur als optionale Feierabend-Sache auf.</div>`;
+  document.getElementById('pp-eis').innerHTML=e.length?e.map(projZettel).join(''):`<div class="empty">Eisfach leer.</div>`;
+  document.getElementById('pp-fertig').innerHTML=f.length?f.map(projZettel).join(''):`<div class="empty">Noch nichts abgeschlossen.</div>`;
+}
 function renderProjekte(){
-  const a=aktive(),e=S.projekte.filter(p=>p.status==='eis'),f=S.projekte.filter(p=>p.status==='fertig');
+  const a=aktive(),e=S.projekte.filter(p=>p.status==='eis'&&p.bereich!=='privat'),f=S.projekte.filter(p=>p.status==='fertig'&&p.bereich!=='privat');
   const c=document.getElementById('p-count');c.textContent=`${a.length} / ${MAX_AKTIV} aktiv`;c.classList.toggle('alarm',a.length>=MAX_AKTIV);
   document.getElementById('p-aktiv').innerHTML=a.length?a.map(projZettel).join(''):`<div class="hint">Kein aktives Projekt. Drei dürfen gleichzeitig laufen — mehr nicht.</div>`;
   document.getElementById('p-eis').innerHTML=e.length?e.map(projZettel).join(''):`<div class="empty">Eisfach leer.</div>`;
   document.getElementById('p-fertig').innerHTML=f.length?f.map(projZettel).join(''):`<div class="empty">Noch nichts abgeschlossen.</div>`;
 }
-function openProjektForm(id=null){
-  const p=id?proj(id):{name:'',bereich:'eigen'};const voll=!id&&aktive().length>=MAX_AKTIV;
-  openSheet(`<h3>${id?'Projekt bearbeiten':'Neues Projekt'}</h3>${voll?`<div class="notice">Du hast schon ${MAX_AKTIV} aktive Projekte. Das hier landet im Eisfach.</div>`:''}<div class="stack">
-    <input id="p-name" placeholder="Projektname" value="${esc(p.name)}">${segHtml('p-seg',p.bereich)}
+function openProjektForm(id=null,privat=false){
+  const p=id?proj(id):{name:'',bereich:privat?'privat':'eigen'};privat=p.bereich==='privat';
+  const voll=!id&&(privat?aktiveP().length>=MAX_PRIVAT:aktive().length>=MAX_AKTIV);
+  openSheet(`<h3>${id?'Projekt bearbeiten':privat?'Neues privates Projekt':'Neues Projekt'}</h3>${voll?`<div class="notice">Schon ${privat?MAX_PRIVAT:MAX_AKTIV} aktive ${privat?'private ':''}Projekte. Das hier landet im Eisfach.</div>`:''}<div class="stack">
+    <input id="p-name" placeholder="Projektname" value="${esc(p.name)}">${privat?`<input type="hidden" id="p-seg" data-val="privat">`:segHtml('p-seg',p.bereich)}
     ${id?'':`<textarea id="p-steps" placeholder="Erste Schritte, je Zeile einer&#10;Schaltplan prüfen&#10;Platine bestellen"></textarea>`}
     <button class="btn solid" onclick="projSave(${id?`'${id}'`:'null'},${voll})">${id?'Speichern':'Anlegen'}</button></div>`);
 }
@@ -400,27 +461,47 @@ function projSave(id,voll){
     const np={id:uid(),name:n,bereich:segVal('p-seg'),status:voll?'eis':'aktiv',erstellt:today(),schritte:st};S.projekte.push(np);expanded.add(np.id);}
   save();closeSheet();render();
 }
-function projStatus(id,st){if(st==='aktiv'&&aktive().length>=MAX_AKTIV){alert(`Schon ${MAX_AKTIV} aktive Projekte. Leg erst eins auf Eis.`);return;}const p=proj(id);p.status=st;if(st==='fertig')p.fertigAm=today();save();render();}
+function projStatus(id,st){const p0=proj(id);const priv=p0.bereich==='privat';if(st==='aktiv'&&(priv?aktiveP().length>=MAX_PRIVAT:aktive().length>=MAX_AKTIV)){alert(`Schon ${priv?MAX_PRIVAT:MAX_AKTIV} aktive ${priv?'private ':''}Projekte. Leg erst eins auf Eis.`);return;}const p=proj(id);p.status=st;if(st==='fertig')p.fertigAm=today();save();render();}
 function projDel(id){if(!confirm('Projekt endgültig löschen?'))return;S.projekte=S.projekte.filter(p=>p.id!==id);save();render();}
+
+/* ================= GEWOHNHEITEN ================= */
+function streak(id,from=today()){let n=0;const d=new Date(from+'T12:00:00');const check=x=>id==='__plan'?(S.tage[x]&&S.tage[x].geplant):(S.tage[x]&&S.tage[x].habits&&S.tage[x].habits[id]);
+  if(!check(iso(d)))d.setDate(d.getDate()-1);/* heute noch offen zählt nicht als Bruch */
+  while(check(iso(d))){n++;d.setDate(d.getDate()-1);if(n>3650)break;}return n;}
+function habitToggle(id){const T=tag(today());if(T.habits[id])delete T.habits[id];else T.habits[id]=true;save();renderHeute();renderHabits();}
+function renderHabits(){
+  const a=S.gewohnheiten.filter(g=>g.status==='aktiv'),aus=S.gewohnheiten.filter(g=>g.status!=='aktiv');
+  const c=document.getElementById('g-count');c.textContent=`${a.length} / ${MAX_HABITS}`;c.classList.toggle('alarm',a.length>=MAX_HABITS);
+  const total=id=>Object.values(S.tage).filter(T=>T.habits&&T.habits[id]).length;
+  const row=g=>`<div class="zettel"><div class="row"><div class="grow"><div class="t">${esc(g.name)}</div><div class="prev">Serie <b>${streak(g.id)}</b> Tage · insgesamt ${total(g.id)}×</div></div>
+    ${g.status==='aktiv'?`<button class="btn sm ghost" onclick="habitStatus('${g.id}','aus')">Pausieren</button>`:`<button class="btn sm" onclick="habitStatus('${g.id}','aktiv')">Wieder an</button><button class="btn sm ghost" onclick="habitDel('${g.id}')">Löschen</button>`}</div></div>`;
+  document.getElementById('g-list').innerHTML=`<div class="zettel"><div class="t">Tag festgelegt</div><div class="prev">Serie <b>${streak('__plan')}</b> Tage — zählt die App automatisch. Das ist die Gewohnheit, um die es eigentlich geht.</div></div>`+(a.map(row).join('')||`<div class="empty">Noch keine. Liegestütze? Sicherung?</div>`)+(aus.length?`<details><summary>Pausierte anzeigen</summary>${aus.map(row).join('')}</details>`:'');
+}
+function openHabitForm(){if(S.gewohnheiten.filter(g=>g.status==='aktiv').length>=MAX_HABITS){alert(`Fünf sind genug. Pausier erst eine.`);return;}
+  openSheet(`<h3>Neue Gewohnheit</h3><div class="stack"><input id="g-name" placeholder="Kurz, z. B. 30 Liegestütze"><button class="btn solid" onclick="habitSave()">Anlegen</button></div>`);setTimeout(()=>document.getElementById('g-name').focus(),250);}
+function habitSave(){const n=document.getElementById('g-name').value.trim();if(!n)return;S.gewohnheiten.push({id:uid(),name:n,status:'aktiv',erstellt:today()});save();closeSheet();render();}
+function habitStatus(id,st){const g=S.gewohnheiten.find(x=>x.id===id);if(st==='aktiv'&&S.gewohnheiten.filter(x=>x.status==='aktiv').length>=MAX_HABITS){alert('Fünf sind genug. Pausier erst eine.');return;}g.status=st;save();render();}
+function habitDel(id){if(!confirm('Gewohnheit samt Verlauf löschen?'))return;S.gewohnheiten=S.gewohnheiten.filter(x=>x.id!==id);Object.values(S.tage).forEach(T=>{if(T.habits)delete T.habits[id];});save();render();}
 
 /* ================= WOCHE ================= */
 function kw(d){const x=new Date(d);x.setHours(0,0,0,0);x.setDate(x.getDate()+3-((x.getDay()+6)%7));const w1=new Date(x.getFullYear(),0,4);return 1+Math.round(((x-w1)/864e5-3+((w1.getDay()+6)%7))/7);}
 function renderWoche(){
   const now=new Date();document.getElementById('w-kw').textContent=`KW ${kw(now)}`;
-  document.getElementById('w-projekte').innerHTML=aktive().length?aktive().map(p=>{const ns=nextStep(p);return `<div class="zettel ${p.bereich}"><div class="t">${esc(p.name)}</div><div class="prev">${ns?`Als nächstes: <b>${esc(ns.text)}</b>`:'<span style="color:var(--alarm)">Kein offener Schritt — im Projekte-Tab eintragen.</span>'}</div><div class="prev">${offene(p.schritte).length} offen</div></div>`;}).join(''):`<div class="empty">Kein aktives Projekt.</div>`;
+  const wp=p=>{const ns=nextStep(p);return `<div class="zettel ${p.bereich}"><div class="t">${esc(p.name)}</div><div class="prev">${ns?`Als nächstes: <b>${esc(ns.text)}</b>`:'<span style="color:var(--alarm)">Kein offener Schritt — eintragen.</span>'}</div><div class="prev">${offene(p.schritte).length} offen</div></div>`;};
+  document.getElementById('w-projekte').innerHTML=(aktive().length?aktive().map(wp).join(''):`<div class="empty">Kein aktives Projekt.</div>`)+(aktiveP().length?`<div class="colh privat" style="margin-top:8px">Privat</div>`+aktiveP().map(wp).join(''):'');
   const mo=new Date(now);mo.setDate(now.getDate()-((now.getDay()+6)%7));const so=new Date(mo);so.setDate(mo.getDate()+6);
   const inWeek=S.auftraege.filter(x=>x.status==='offen'&&x.termin&&x.termin>=iso(mo)&&x.termin<=iso(so)).sort(byTermin),over=S.auftraege.filter(x=>x.status==='offen'&&x.termin&&x.termin<iso(mo));
   const all=over.concat(inWeek);document.getElementById('w-termine').innerHTML=all.length?all.map(x=>auftragZettel(x,true)).join(''):`<div class="empty">Keine Termine diese Woche.</div>`;
-  let v=0,e=0,laenger=0,geplant=0,pk=0;const hits={};
+  let v=0,e=0,pv=0,laenger=0,geplant=0,pk=0;const hits={};
   for(let i=0;i<14;i++){const d=new Date(now);d.setDate(now.getDate()-i);const T=S.tage[iso(d)];if(!T)continue;if(T.geplant)geplant++;if(T.gedauert)laenger++;if(T.pakete==='ja')pk++;
-    [T.haupt,...T.neben].forEach(t=>{if(t.done&&t.text){t.bereich==='vater'?v++:e++;if(t.projektId)hits[t.projektId]=(hits[t.projektId]||0)+1;}});}
-  S.projekte.forEach(p=>p.schritte.forEach(s=>{if(s.done&&s.doneAt&&(now-s.doneAt)/864e5<=14){p.bereich==='vater'?v++:e++;hits[p.id]=(hits[p.id]||0)+1;}}));
+    tasks(T).forEach(t=>{if(t.done){if(t.bereich==='privat')pv++;else t.bereich==='vater'?v++:e++;if(t.projektId)hits[t.projektId]=(hits[t.projektId]||0)+1;}});}
+  S.projekte.forEach(p=>p.schritte.forEach(s=>{if(s.done&&s.doneAt&&(now-s.doneAt)/864e5<=14){if(p.bereich==='privat')pv++;else p.bereich==='vater'?v++:e++;hits[p.id]=(hits[p.id]||0)+1;}}));
   S.auftraege.filter(x=>x.status==='fertig'&&x.erledigtAm&&(now-new Date(x.erledigtAm))/864e5<=14).forEach(x=>x.bereich==='vater'?v++:e++);
   const tot=v+e||1,hitHtml=Object.entries(hits).map(([id,n])=>{const p=proj(id);return p?`<div class="kv"><span>${esc(p.name)}</span><b>${n}</b></div>`:'';}).join('');
   const stale=aktive().filter(p=>!hits[p.id]&&(!p.erstellt||(now-new Date(p.erstellt))/864e5>=7));
   document.getElementById('w-stats').innerHTML=`<div class="row" style="justify-content:space-between"><span><span class="tag vater">Vater</span> ${v}</span><span>${e} <span class="tag eigen">Eigenes</span></span></div>
     <div class="bar"><i class="v" style="width:${v/tot*100}%"></i><i class="e" style="width:${e/tot*100}%"></i></div><div class="muted small">Erledigte Aufgaben, Schritte und Aufträge nach Bereich</div>
-    <div class="kv"><span>Tage mit Plan</span><b>${geplant} / 14</b></div><div class="kv"><span>Tage, an denen etwas länger dauerte</span><b>${laenger}</b></div><div class="kv"><span>Paketabgaben</span><b>${pk}</b></div>
+    <div class="kv"><span>Tage mit Plan</span><b>${geplant} / 14</b></div><div class="kv"><span>Tage, an denen etwas länger dauerte</span><b>${laenger}</b></div><div class="kv"><span>Paketabgaben</span><b>${pk}</b></div><div class="kv"><span>Privat erledigt</span><b>${pv}</b></div>${S.gewohnheiten.filter(g=>g.status==='aktiv').map(g=>{let n=0;for(let i=0;i<14;i++){const d=new Date(now);d.setDate(now.getDate()-i);const T=S.tage[iso(d)];if(T&&T.habits&&T.habits[g.id])n++;}return `<div class="kv"><span>${esc(g.name)}</span><b>${n} / 14</b></div>`;}).join('')}
     ${hitHtml?`<div style="margin-top:12px;font-weight:700">Projekte mit Fortschritt</div>${hitHtml}`:''}
     ${stale.length?`<div class="hint" style="margin-top:12px">Ohne Fortschritt in 14 Tagen: ${stale.map(p=>esc(p.name)).join(', ')}. Eisfach?</div>`:''}`;
 }
@@ -428,9 +509,10 @@ function renderWoche(){
 /* ================= ARCHIV + SUCHE ================= */
 function hl(s,q){s=esc(s);if(!q)return s;const r=new RegExp(q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'),'ig');return s.replace(r,m=>`<mark>${m}</mark>`);}
 function dayHtml(d,T,q=''){
-  const tasks=[T.haupt,...T.neben].filter(t=>t.text);
+  const ts=tasks(T);
   return `<div class="day"><div class="dh"><span>${fmtLong(d)}</span><span class="small muted">${T.pakete==='ja'?'📦 15:00':''}</span></div>
-    ${tasks.length?`<ul>${tasks.map((t,i)=>`<li class="${t.done?'d':'o'}">${i===0?'<b>':''}${hl(t.text,q)}${i===0?'</b>':''} <span class="tag ${t.bereich}" style="font-size:11px">${t.bereich==='vater'?'V':'E'}</span></li>`).join('')}</ul>`:`<div class="q">Kein Plan</div>`}
+    ${ts.length?`<ul>${SLOTS.filter(x=>T.slots[x[0]].text).map(([k,b,rolle])=>{const t=T.slots[k];return `<li class="${t.done?'d':'o'}">${rolle==='haupt'?'<b>':''}${hl(t.text,q)}${rolle==='haupt'?'</b>':''} <span class="tag ${b}" style="font-size:11px">${b==='vater'?'V':b==='eigen'?'E':'P'}</span></li>`;}).join('')}</ul>`:`<div class="q">Kein Plan</div>`}
+    ${T.habits&&Object.keys(T.habits).length?`<div class="q">✓ ${Object.keys(T.habits).map(id=>{const g=S.gewohnheiten.find(x=>x.id===id);return g?esc(g.name):'';}).filter(Boolean).join(' · ')}</div>`:''}
     ${T.geschafft?`<div class="q"><b>Fertig:</b> ${hl(T.geschafft,q)}</div>`:''}${T.gedauert?`<div class="q"><b>Länger:</b> ${hl(T.gedauert,q)}</div>`:''}</div>`;
 }
 function renderArchiv(){
@@ -441,7 +523,7 @@ function renderArchiv(){
     let cur='',html='';days.forEach(d=>{const m=d.slice(0,7);if(m!==cur){cur=m;html+=`<div class="monat">${MON[+d.slice(5,7)-1]} ${d.slice(0,4)}</div>`;}html+=dayHtml(d,S.tage[d]);});out.innerHTML=html;return;
   }
   const hits=[];const has=s=>(s||'').toLowerCase().includes(ql);
-  Object.entries(S.tage).sort((a,b)=>a[0]<b[0]?1:-1).forEach(([d,T])=>{if([T.haupt,...T.neben].some(t=>has(t.text))||has(T.geschafft)||has(T.gedauert))hits.push({k:'Tag',d,html:dayHtml(d,T,q)});});
+  Object.entries(S.tage).sort((a,b)=>a[0]<b[0]?1:-1).forEach(([d,T])=>{if(tasks(T).some(t=>has(t.text))||has(T.geschafft)||has(T.gedauert))hits.push({k:'Tag',d,html:dayHtml(d,T,q)});});
   S.projekte.forEach(p=>{const ms=p.schritte.filter(s=>has(s.text));if(has(p.name)||ms.length)hits.push({k:'Projekt',html:`<div class="hit"><div class="kind">Projekt · ${p.status}</div><div class="t">${hl(p.name,q)}</div>${ms.map(s=>`<div class="small ${s.done?'muted':''}">${s.done?'✓':'○'} ${hl(s.text,q)}${s.done&&s.doneAt?` · ${fmt(iso(s.doneAt))}`:''}</div>`).join('')}</div>`});});
   S.auftraege.forEach(a=>{const ms=a.schritte.filter(s=>has(s.text));if(has(a.name)||ms.length)hits.push({k:'Auftrag',html:`<div class="hit"><div class="kind">Auftrag · ${a.status}${a.erledigtAm?' · '+fmt(a.erledigtAm):a.termin?' · Termin '+fmt(a.termin):''}</div><div class="t">${hl(a.name,q)}</div>${ms.map(s=>`<div class="small ${s.done?'muted':''}">${s.done?'✓':'○'} ${hl(s.text,q)}</div>`).join('')}</div>`});});
   S.eingang.forEach(e=>{if(has(e.text))hits.push({k:'Eingang',html:`<div class="hit"><div class="kind">Eingang</div><div class="t">${hl(e.text,q)}</div></div>`});});
@@ -452,7 +534,7 @@ function renderArchiv(){
 function exportJson(){const b=new Blob([JSON.stringify(S,null,1)],{type:'application/json'});const u=URL.createObjectURL(b);const a=document.createElement('a');a.href=u;a.download=`tagwerk-${today()}.json`;a.click();setTimeout(()=>URL.revokeObjectURL(u),1000);}
 function importJson(inp){const f=inp.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{const d=JSON.parse(r.result);if(!d.projekte||!d.tage)throw 0;if(!confirm('Vorhandene Daten mit der Sicherung überschreiben?'))return;localStorage.setItem(KEY,JSON.stringify(d));S=load();save();render();}catch(e){alert('Datei nicht lesbar.');}};r.readAsText(f);inp.value='';}
 
-render();
+render();showMehr('privat');show('heute');
 </script>
 </body>
 </html>
