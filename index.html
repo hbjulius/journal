@@ -117,6 +117,11 @@ mark{background:#F2E38A;color:inherit;border-radius:2px}
 .sub button{flex:none;min-height:44px;padding:0 14px;border-radius:999px;border:1.5px solid var(--line);font-weight:700;font-size:15px;color:var(--ink2)}
 .sub button.on{border-color:var(--ink);color:var(--ink);background:var(--panel)}
 .panel{display:none}.panel.on{display:block}
+.picks{border:1.5px solid var(--line);border-radius:8px;background:var(--panel);padding:4px 10px}
+.picks label{display:flex;align-items:center;gap:10px;min-height:44px;font-weight:500;margin:0}
+.picks input[type=checkbox]{width:24px;height:24px;min-height:0;flex:none;accent-color:var(--ink);margin:0}
+.substeps{margin-top:8px;border-top:1px solid var(--soft);padding-top:4px}
+.substeps .step{padding:6px 0}
 .pk{display:flex;align-items:center;justify-content:space-between;gap:10px;background:var(--panel);border:1.5px solid var(--line);border-radius:8px;padding:10px 14px;margin-top:12px}
 .pk.ja{border-color:var(--ink);border-width:2px}.pk.nein{opacity:.6}
 </style>
@@ -236,7 +241,7 @@ const MON=['Januar','Februar','März','April','Mai','Juni','Juli','August','Sept
 const fmt=d=>d?`${d.slice(8,10)}.${d.slice(5,7)}.`:'';
 const fmtLong=d=>{const x=new Date(d+'T12:00:00');return `${WT[x.getDay()]}, ${x.getDate()}. ${MON[x.getMonth()]} ${x.getFullYear()}`;};
 const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-const emptyTask=(bereich='eigen')=>({text:'',bereich,projektId:'',schrittId:'',done:false});
+const emptyTask=(bereich='eigen')=>({text:'',bereich,quelleId:'',schrittIds:[],done:false});
 const emptySlots=()=>Object.fromEntries(SLOTS.map(([k,b])=>[k,emptyTask(b)]));
 let S=load(), expanded=new Set(), editPlan=false, editFb=false;
 
@@ -250,6 +255,7 @@ function load(){
     /* v2 -> v3: feste Slots je Bereich */
     if(!T.slots){T.slots=emptySlots();const put=(t,rolle)=>{if(!t||!t.text)return;const b=t.bereich==='vater'?'vater':'eigen';const keys=SLOTS.filter(x=>x[1]===b&&x[2]===rolle).map(x=>x[0]);const k=keys.find(k=>!T.slots[k].text)||keys[keys.length-1];T.slots[k]=Object.assign(emptyTask(b),t,{bereich:b});};
       put(T.haupt,'haupt');(T.neben||[]).forEach(n=>put(n,'neben'));delete T.haupt;delete T.neben;}});
+  Object.values(d.tage).forEach(T=>{if(T.slots)Object.values(T.slots).forEach(t=>{if(t.quelleId===undefined){t.quelleId=t.projektId||'';t.schrittIds=t.schrittId?[t.schrittId]:[];delete t.projektId;delete t.schrittId;}});});
   if(!d.gewohnheiten)d.gewohnheiten=[];if(!d.todos)d.todos=[];Object.values(d.tage).forEach(T=>{if(T.termine===undefined)T.termine='';if(T.todoId===undefined)T.todoId='';});Object.values(d.tage).forEach(T=>{if(!T.habits)T.habits={};});
   d.version=4;return d;
 }
@@ -276,8 +282,13 @@ function closeSheet(){document.getElementById('sheet-bg').classList.remove('on')
 function segHtml(id,val,a='Für Vater',b='Eigenes',va='vater',vb='eigen'){return `<div class="seg" id="${id}" data-val="${val}"><button class="${val===va?'on '+va:''}" onclick="segSet('${id}','${va}')">${a}</button><button class="${val===vb?'on '+vb:''}" onclick="segSet('${id}','${vb}')">${b}</button></div>`;}
 function segSet(id,val){const s=document.getElementById(id);s.dataset.val=val;const [b1,b2]=s.children;const v1=b1.getAttribute('onclick').match(/'([^']+)'\)$/)[1];b1.className=val===v1?'on '+v1:'';b2.className=val!==v1?'on '+val:'';}
 const segVal=id=>document.getElementById(id).dataset.val;
-function projSelect(id,val,bereich){const ps=bereich?aktiveB(bereich):aktive();return `<select id="${id}"><option value="">Kein Projekt</option>${ps.map(p=>`<option value="${p.id}" ${p.id===val?'selected':''}>${esc(p.name)}</option>`).join('')}</select>`;}
-function stepSelect(id,projektId,val){const p=proj(projektId);const st=p?offene(p.schritte):[];return `<select id="${id}" ${st.length?'':'disabled'}><option value="">${st.length?'Freier Text / kein Schritt':'Projekt hat keine offenen Schritte'}</option>${st.map(s=>`<option value="${s.id}" ${s.id===val?'selected':''}>${esc(s.text)}</option>`).join('')}</select>`;}
+function quelleSelect(id,val,bereich){
+  const ps=aktiveB(bereich),as=bereich==='privat'?[]:S.auftraege.filter(a=>a.status==='offen'&&a.bereich===bereich).sort(byTermin);
+  const opt=x=>`<option value="${x.id}" ${x.id===val?'selected':''}>${esc(x.name)}</option>`;
+  return `<select id="${id}"><option value="">Freier Text – kein Projekt, kein Auftrag</option>${ps.length?`<optgroup label="Projekte">${ps.map(opt).join('')}</optgroup>`:''}${as.length?`<optgroup label="Aufträge">${as.map(opt).join('')}</optgroup>`:''}</select>`;}
+function stepPicks(k,quelleId,sel){const o=holder(quelleId);if(!o)return '';const st=offene(o.schritte);
+  if(!st.length)return `<div class="hint">Keine offenen Schritte. Aufgabe gilt dann als Ganzes.</div>`;
+  return `<div class="muted small" style="margin:6px 0 4px">Welche Schritte heute?</div><div class="picks">${st.map(x=>`<label><input type="checkbox" name="sp-${k}" value="${x.id}" ${sel.includes(x.id)?'checked':''}>${esc(x.text)}</label>`).join('')}</div>`;}
 
 /* ================= Eingang ================= */
 function openQuick(){openSheet(`<h3>Schnell erfassen</h3><div class="stack"><textarea id="q-text" placeholder="Idee, Aufgabe, was auch immer…"></textarea><button class="btn solid" onclick="quickSave()">In den Eingang</button></div>`);setTimeout(()=>document.getElementById('q-text').focus(),250);}
@@ -363,14 +374,13 @@ function renderHeute(){
   }
 }
 function cols(v,e,leer){return `<div class="cols"><div><div class="colh vater">Für Vater</div>${v.length?v.join(''):`<div class="empty">${leer}</div>`}</div><div><div class="colh eigen">Eigenes</div>${e.length?e.join(''):`<div class="empty">${leer}</div>`}</div></div>`;}
-function taskForm(k,t,b){return `<div class="stack"><textarea id="tf-${k}" style="min-height:52px" placeholder="${k.endsWith('h')&&b!=='privat'?'Wenn nur das fertig wird, war der Tag gut.':'Optional'}">${esc(t.text)}</textarea>${projSelect('sel-'+k,t.projektId,b)}<div id="stw-${k}">${stepSelect('st-'+k,t.projektId,t.schrittId)}</div></div>`;}
+function taskForm(k,t,b){return `<div class="stack"><textarea id="tf-${k}" style="min-height:52px" placeholder="${k.endsWith('h')&&b!=='privat'?'Wenn nur das fertig wird, war der Tag gut.':'Optional'}">${esc(t.text)}</textarea>${quelleSelect('sel-'+k,t.quelleId,b)}<div id="stw-${k}">${stepPicks(k,t.quelleId,t.schrittIds||[])}</div></div>`;}
 function bindTaskForm(k){
   const sel=document.getElementById('sel-'+k);
-  sel.addEventListener('change',()=>{document.getElementById('stw-'+k).innerHTML=stepSelect('st-'+k,sel.value,'');bindStep(k);});
-  bindStep(k);
+  sel.addEventListener('change',()=>{document.getElementById('stw-'+k).innerHTML=stepPicks(k,sel.value,[]);const o=holder(sel.value);const ta=document.getElementById('tf-'+k);if(o&&!ta.value.trim())ta.value=o.name;});
 }
-function bindStep(k){const st=document.getElementById('st-'+k);st.addEventListener('change',()=>{const p=proj(document.getElementById('sel-'+k).value);const s=p&&p.schritte.find(x=>x.id===st.value);const ta=document.getElementById('tf-'+k);if(s&&!ta.value.trim())ta.value=s.text;});}
-function readTask(k,old,b){const text=document.getElementById('tf-'+k).value.trim();return {text,bereich:b,projektId:document.getElementById('sel-'+k).value,schrittId:document.getElementById('st-'+k).value,done:text&&text===old.text?(old.done||false):false,doneAt:text&&text===old.text?old.doneAt:''};}
+function readTask(k,old,b){const text=document.getElementById('tf-'+k).value.trim();const ids=[...document.querySelectorAll(`input[name="sp-${k}"]:checked`)].map(i=>i.value);
+  return {text,bereich:b,quelleId:document.getElementById('sel-'+k).value,schrittIds:ids,done:text&&text===old.text?(old.done||false):false,doneAt:text&&text===old.text?old.doneAt:''};}
 function planAbgeben(){
   const T=tag(today());const neu={};SLOTS.forEach(([k,b])=>neu[k]=readTask(k,T.slots[k],b));
   if(!neu.vh.text&&!neu.eh.text){alert('Ohne Hauptaufgabe kein Plan. Mindestens eine — Vater oder Eigenes.');return;}
@@ -379,13 +389,15 @@ function planAbgeben(){
   T.slots=neu;T.pakete=segVal('seg-pk');T.geplant=true;editPlan=false;save();render();
 }
 function taskView(t,kind,k){
-  const p=proj(t.projektId);
+  const o=holder(t.quelleId);const steps=o?(t.schrittIds||[]).map(id=>o.schritte.find(x=>x.id===id)).filter(Boolean):[];
+  const isA=o&&S.auftraege.includes(o);
   return `<div class="zettel ${t.bereich} ${kind==='haupt'?'haupt':''} ${t.done?'done':''}"><div class="row"><button class="chk" onclick="taskToggle('${k}')">${t.done?'✓':''}</button>
-    <div class="grow"><div class="t ${kind==='haupt'?'big':''}">${esc(t.text)}</div>${p?`<div class="prev">${esc(p.name)}</div>`:''}</div></div></div>`;
+    <div class="grow"><div class="t ${kind==='haupt'?'big':''}">${esc(t.text)}</div>${o?`<div class="prev">${isA?'Auftrag':'Projekt'}${t.text===o.name?'':' · '+esc(o.name)}</div>`:''}</div></div>
+    ${steps.length?`<div class="substeps">${steps.map(x=>`<div class="step ${x.done?'done':''}"><button class="chk sm ${x.done?'on':''}" onclick="stepToggle('${o.id}','${x.id}')">${x.done?'✓':''}</button><div class="st"><span class="tx">${esc(x.text)}</span></div></div>`).join('')}</div>`:''}</div>`;
 }
 function taskToggle(k){
   const T=tag(today());const t=T.slots[k];t.done=!t.done;t.doneAt=t.done?today():'';
-  if(t.schrittId){const p=proj(t.projektId);const s=p&&p.schritte.find(x=>x.id===t.schrittId);if(s){s.done=t.done;s.doneAt=t.done?Date.now():0;}}
+  const o=holder(t.quelleId);if(o&&t.schrittIds)t.schrittIds.forEach(id=>{const s=o.schritte.find(x=>x.id===id);if(s){s.done=t.done;s.doneAt=t.done?Date.now():0;}});
   save();render();
 }
 function paketeToggle(){const T=tag(today());T.pakete=T.pakete==='ja'?'nein':'ja';save();renderHeute();}
@@ -529,7 +541,7 @@ function renderWoche(){
   const all=over.concat(inWeek);document.getElementById('w-termine').innerHTML=all.length?all.map(x=>auftragZettel(x,true)).join(''):`<div class="empty">Keine Termine diese Woche.</div>`;
   let v=0,e=0,pv=0,laenger=0,geplant=0,pk=0;const hits={};
   for(let i=0;i<14;i++){const d=new Date(now);d.setDate(now.getDate()-i);const T=S.tage[iso(d)];if(!T)continue;if(T.geplant)geplant++;if(T.gedauert)laenger++;if(T.pakete==='ja')pk++;
-    tasks(T).forEach(t=>{if(t.done){if(t.bereich==='privat')pv++;else t.bereich==='vater'?v++:e++;if(t.projektId)hits[t.projektId]=(hits[t.projektId]||0)+1;}});}
+    tasks(T).forEach(t=>{if(t.done){if(t.bereich==='privat')pv++;else t.bereich==='vater'?v++:e++;if(t.quelleId&&proj(t.quelleId))hits[t.quelleId]=(hits[t.quelleId]||0)+1;}});}
   S.projekte.forEach(p=>p.schritte.forEach(s=>{if(s.done&&s.doneAt&&(now-s.doneAt)/864e5<=14){if(p.bereich==='privat')pv++;else p.bereich==='vater'?v++:e++;hits[p.id]=(hits[p.id]||0)+1;}}));
   S.auftraege.filter(x=>x.status==='fertig'&&x.erledigtAm&&(now-new Date(x.erledigtAm))/864e5<=14).forEach(x=>x.bereich==='vater'?v++:e++);
   S.todos.filter(x=>x.status==='fertig'&&x.erledigtAm&&(now-new Date(x.erledigtAm))/864e5<=14).forEach(x=>x.bereich==='vater'?v++:e++);
