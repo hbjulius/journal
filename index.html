@@ -141,17 +141,14 @@ mark{background:#F2E38A;color:inherit;border-radius:2px}
     <button class="link" id="h-back" onclick="dayGo(today())" style="visibility:hidden">Zurück zu heute</button>
     <button class="pill" id="h-eingang" onclick="openEingang()">Eingang · 0</button>
   </div>
-  <div id="h-pakete"></div>
-  <div id="h-habits"></div>
   <div id="h-termine"></div>
-  <h2>Aufträge</h2>
-  <div id="h-auftraege"></div>
-  <h2>Projekte <span class="count">nächster Schritt</span></h2>
-  <div id="h-projekte"></div>
+  <div id="h-pakete"></div>
   <h2>Tagesplan</h2>
   <div id="h-plan"></div>
   <h2>Feierabend</h2>
   <div id="h-fb"></div>
+  <h2>Gewohnheiten</h2>
+  <div id="h-habits"></div>
   <div style="height:24px"></div>
 </section>
 
@@ -180,10 +177,11 @@ mark{background:#F2E38A;color:inherit;border-radius:2px}
 
 <section class="view" id="v-woche">
   <div class="head"><h1 id="w-kw">Woche</h1></div>
-  <h2>Nächster Schritt je Projekt</h2>
-  <div id="w-projekte"></div>
-  <h2>Termine diese Woche</h2>
-  <div id="w-termine"></div>
+  <h2>Aufträge <span class="count">die dringendsten</span></h2>
+  <div id="h-auftraege"></div>
+  <h2>Projekte <span class="count">nächster Schritt</span></h2>
+  <div id="h-projekte"></div>
+  <details><summary>Alle Termine der Woche</summary><div id="w-termine"></div></details>
   <h2>Letzte 14 Tage</h2>
   <div class="form" id="w-stats"></div>
 </section>
@@ -340,11 +338,11 @@ function renderHeute(){
   else pk.innerHTML='';
 
   /* Termine */
-  document.getElementById('h-termine').innerHTML=T.geplant&&!editPlan&&T.termine?`<div class="form" style="margin-top:12px;padding:10px 14px"><div class="muted small">Termine</div><div style="white-space:pre-wrap;font-weight:600">${esc(T.termine)}</div></div>`:'';
+  document.getElementById('h-termine').innerHTML=T.geplant&&!editPlan&&T.termine?`<div class="form" style="margin-top:14px;padding:10px 14px"><div class="muted small">Termine</div><div style="white-space:pre-wrap;font-weight:600">${esc(T.termine)}</div></div>`:'';
 
   /* Gewohnheiten */
   const hb=S.gewohnheiten.filter(g=>g.status==='aktiv');
-  document.getElementById('h-habits').innerHTML=hb.length?`<div class="hab">${hb.map(g=>{const on=!!T.habits[g.id];return `<button class="${on?'on':''}" onclick="habitToggle('${g.id}')"><span class="chk sm ${on?'on':''}">${on?'✓':''}</span>${esc(g.name)}<span class="streak">${streak(g.id,d)}</span></button>`;}).join('')}</div>`:'';
+  document.getElementById('h-habits').innerHTML=!hb.length?`<div class="empty small">Keine angelegt — unter Mehr → Gewohnheiten.</div>`:`<div class="hab">${hb.map(g=>{const on=!!T.habits[g.id];return `<button class="${on?'on':''}" onclick="habitToggle('${g.id}')"><span class="chk sm ${on?'on':''}">${on?'✓':''}</span>${esc(g.name)}<span class="streak">${streak(g.id,d)}</span></button>`;}).join('')}</div>`;
 
   /* Aufträge */
   const offen=S.auftraege.filter(a=>a.status==='offen').sort(byTermin);
@@ -547,7 +545,7 @@ function kw(d){const x=new Date(d);x.setHours(0,0,0,0);x.setDate(x.getDate()+3-(
 function renderWoche(){
   const now=new Date();document.getElementById('w-kw').textContent=`KW ${kw(now)}`;
   const wp=p=>{const ns=nextStep(p);return `<div class="zettel ${p.bereich}"><div class="t">${esc(p.name)}</div><div class="prev">${ns?`Als nächstes: <b>${esc(ns.text)}</b>`:'<span style="color:var(--alarm)">Kein offener Schritt — eintragen.</span>'}</div><div class="prev">${offene(p.schritte).length} offen</div></div>`;};
-  document.getElementById('w-projekte').innerHTML=(aktive().length?aktive().map(wp).join(''):`<div class="empty">Kein aktives Projekt.</div>`)+(aktiveP().length?`<div class="colh privat" style="margin-top:8px">Privat</div>`+aktiveP().map(wp).join(''):'');
+  const wpEl=document.getElementById('w-projekte');if(wpEl)wpEl.innerHTML='';
   const mo=new Date(now);mo.setDate(now.getDate()-((now.getDay()+6)%7));const so=new Date(mo);so.setDate(mo.getDate()+6);
   const inWeek=S.auftraege.filter(x=>x.status==='offen'&&x.termin&&x.termin>=iso(mo)&&x.termin<=iso(so)).sort(byTermin),over=S.auftraege.filter(x=>x.status==='offen'&&x.termin&&x.termin<iso(mo));
   const all=over.concat(inWeek);document.getElementById('w-termine').innerHTML=all.length?all.map(x=>auftragZettel(x,true)).join(''):`<div class="empty">Keine Termine diese Woche.</div>`;
