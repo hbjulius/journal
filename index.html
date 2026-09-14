@@ -122,6 +122,10 @@ mark{background:#F2E38A;color:inherit;border-radius:2px}
 .picks input[type=checkbox]{width:24px;height:24px;min-height:0;flex:none;accent-color:var(--ink);margin:0}
 .substeps{margin-top:8px;border-top:1px solid var(--soft);padding-top:4px}
 .substeps .step{padding:6px 0}
+.daynav{display:flex;align-items:center;gap:8px}
+.daynav button{width:44px;height:44px;border:1.5px solid var(--line);border-radius:10px;font-size:20px;font-weight:700;display:grid;place-items:center;background:var(--panel)}
+.daylbl{font-size:13px;font-weight:700;padding:3px 9px;border-radius:4px;background:var(--ink);color:var(--paper);vertical-align:middle;margin-left:8px}
+.daylbl.off{background:var(--ink2)}
 .pk{display:flex;align-items:center;justify-content:space-between;gap:10px;background:var(--panel);border:1.5px solid var(--line);border-radius:8px;padding:10px 14px;margin-top:12px}
 .pk.ja{border-color:var(--ink);border-width:2px}.pk.nein{opacity:.6}
 </style>
@@ -131,6 +135,10 @@ mark{background:#F2E38A;color:inherit;border-radius:2px}
 <section class="view on" id="v-heute">
   <div class="head">
     <div><div class="muted small" id="h-wtag"></div><h1 id="h-datum"></h1></div>
+    <div class="daynav"><button onclick="dayShift(-1)">‹</button><button onclick="dayShift(1)">›</button></div>
+  </div>
+  <div class="row" style="margin-top:10px;justify-content:space-between">
+    <button class="link" id="h-back" onclick="dayGo(today())" style="visibility:hidden">Zurück zu heute</button>
     <button class="pill" id="h-eingang" onclick="openEingang()">Eingang · 0</button>
   </div>
   <div id="h-pakete"></div>
@@ -243,7 +251,10 @@ const fmtLong=d=>{const x=new Date(d+'T12:00:00');return `${WT[x.getDay()]}, ${x
 const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const emptyTask=(bereich='eigen')=>({text:'',bereich,quelleId:'',schrittIds:[],done:false});
 const emptySlots=()=>Object.fromEntries(SLOTS.map(([k,b])=>[k,emptyTask(b)]));
-let S=load(), expanded=new Set(), editPlan=false, editFb=false;
+let S=load(), expanded=new Set(), editPlan=false, editFb=false, curDay=today();
+function dayShift(n){const d=new Date(curDay+'T12:00:00');d.setDate(d.getDate()+n);dayGo(iso(d));}
+function dayGo(d){curDay=d;editPlan=false;editFb=false;window.scrollTo(0,0);renderHeute();}
+function dayLabel(d){const t=today();const diff=Math.round((new Date(d+'T12:00:00')-new Date(t+'T12:00:00'))/864e5);return diff===0?'Heute':diff===1?'Morgen':diff===-1?'Gestern':diff>1?`in ${diff} Tagen`:`vor ${-diff} Tagen`;}
 
 function load(){
   let d=null;try{const r=localStorage.getItem(KEY);if(r)d=JSON.parse(r);}catch(e){}
@@ -302,7 +313,7 @@ function openEingang(){
 }
 function eingangDel(id){S.eingang=S.eingang.filter(e=>e.id!==id);save();openEingang();render();}
 function eingangZu(id,ziel){
-  const e=S.eingang.find(x=>x.id===id);if(!e)return;const d=tag(today());
+  const e=S.eingang.find(x=>x.id===id);if(!e)return;const d=tag(curDay);
   if(ziel==='haupt'||ziel==='neben'){const keys=SLOTS.filter(x=>x[1]!=='privat'&&(ziel==='haupt'?x[2]==='haupt':x[2]==='neben')).map(x=>x[0]);const k=keys.find(k=>!d.slots[k].text)||keys[0];d.slots[k]=Object.assign(emptyTask(d.slots[k].bereich),{text:e.text});d.geplant=false;editPlan=true;}
   else if(ziel==='auftrag'){eingangDel(id);closeSheet();openAuftragForm(null,e.text);return;}
   else if(ziel==='todo'){eingangDel(id);closeSheet();openTodoForm(e.text);return;}
@@ -317,9 +328,10 @@ function openStepZiel(text){
 
 /* ================= HEUTE ================= */
 function renderHeute(){
-  const d=today(),T=tag(d),now=new Date();
-  document.getElementById('h-wtag').textContent=WT[now.getDay()];
-  document.getElementById('h-datum').textContent=`${now.getDate()}. ${MON[now.getMonth()]}`;
+  const d=curDay,T=tag(d),now=new Date(),dd=new Date(d+'T12:00:00'),isToday=d===today();
+  document.getElementById('h-wtag').textContent=WT[dd.getDay()];
+  document.getElementById('h-datum').innerHTML=`${dd.getDate()}. ${MON[dd.getMonth()]}<span class="daylbl ${isToday?'':'off'}">${dayLabel(d)}</span>`;
+  document.getElementById('h-back').style.visibility=isToday?'hidden':'visible';
   const eb=document.getElementById('h-eingang');eb.textContent=`Eingang · ${S.eingang.length}`;eb.classList.toggle('alarm',S.eingang.length>0);
 
   /* Pakete */
@@ -332,7 +344,7 @@ function renderHeute(){
 
   /* Gewohnheiten */
   const hb=S.gewohnheiten.filter(g=>g.status==='aktiv');
-  document.getElementById('h-habits').innerHTML=hb.length?`<div class="hab">${hb.map(g=>{const on=!!T.habits[g.id];return `<button class="${on?'on':''}" onclick="habitToggle('${g.id}')"><span class="chk sm ${on?'on':''}">${on?'✓':''}</span>${esc(g.name)}<span class="streak">${streak(g.id)}</span></button>`;}).join('')}</div>`:'';
+  document.getElementById('h-habits').innerHTML=hb.length?`<div class="hab">${hb.map(g=>{const on=!!T.habits[g.id];return `<button class="${on?'on':''}" onclick="habitToggle('${g.id}')"><span class="chk sm ${on?'on':''}">${on?'✓':''}</span>${esc(g.name)}<span class="streak">${streak(g.id,d)}</span></button>`;}).join('')}</div>`:'';
 
   /* Aufträge */
   const offen=S.auftraege.filter(a=>a.status==='offen').sort(byTermin);
@@ -364,8 +376,8 @@ function renderHeute(){
 
   /* Feierabend */
   const fb=document.getElementById('h-fb');
-  if(!T.abgegeben||editFb){
-    fb.innerHTML=`<div class="form ${now.getHours()>=18?'now':''}"><label>Was ist fertig geworden?</label><textarea id="fb-1">${esc(T.geschafft)}</textarea>
+  if(d>today()){fb.innerHTML=`<div class="hint">Erst wenn der Tag da ist.</div>`;}else if(!T.abgegeben||editFb){
+    fb.innerHTML=`<div class="form ${isToday&&now.getHours()>=18?'now':''}"><label>Was ist fertig geworden?</label><textarea id="fb-1">${esc(T.geschafft)}</textarea>
       <label>Was hat länger gedauert als gedacht?</label><textarea id="fb-2">${esc(T.gedauert)}</textarea>
       <div style="margin-top:16px" class="stack"><button class="btn solid" onclick="fbAbgeben()">Feierabend abgeben</button>${T.abgegeben?`<button class="btn ghost" onclick="editFb=false;renderHeute()">Abbrechen</button>`:''}</div></div>`;
   }else{
@@ -382,7 +394,7 @@ function bindTaskForm(k){
 function readTask(k,old,b){const text=document.getElementById('tf-'+k).value.trim();const ids=[...document.querySelectorAll(`input[name="sp-${k}"]:checked`)].map(i=>i.value);
   return {text,bereich:b,quelleId:document.getElementById('sel-'+k).value,schrittIds:ids,done:text&&text===old.text?(old.done||false):false,doneAt:text&&text===old.text?old.doneAt:''};}
 function planAbgeben(){
-  const T=tag(today());const neu={};SLOTS.forEach(([k,b])=>neu[k]=readTask(k,T.slots[k],b));
+  const T=tag(curDay);const neu={};SLOTS.forEach(([k,b])=>neu[k]=readTask(k,T.slots[k],b));
   if(!neu.vh.text&&!neu.eh.text){alert('Ohne Hauptaufgabe kein Plan. Mindestens eine — Vater oder Eigenes.');return;}
   const ts=document.getElementById('pf-todo');if(ts&&!ts.value){alert('Ein To-do gehört heute dazu. Es sind welche offen.');return;}
   T.todoId=ts?ts.value:'';T.termine=document.getElementById('pf-termine').value.trim();
@@ -396,12 +408,12 @@ function taskView(t,kind,k){
     ${steps.length?`<div class="substeps">${steps.map(x=>`<div class="step ${x.done?'done':''}"><button class="chk sm ${x.done?'on':''}" onclick="stepToggle('${o.id}','${x.id}')">${x.done?'✓':''}</button><div class="st"><span class="tx">${esc(x.text)}</span></div></div>`).join('')}</div>`:''}</div>`;
 }
 function taskToggle(k){
-  const T=tag(today());const t=T.slots[k];t.done=!t.done;t.doneAt=t.done?today():'';
+  const T=tag(curDay);const t=T.slots[k];t.done=!t.done;t.doneAt=t.done?curDay:'';
   const o=holder(t.quelleId);if(o&&t.schrittIds)t.schrittIds.forEach(id=>{const s=o.schritte.find(x=>x.id===id);if(s){s.done=t.done;s.doneAt=t.done?Date.now():0;}});
   save();render();
 }
-function paketeToggle(){const T=tag(today());T.pakete=T.pakete==='ja'?'nein':'ja';save();renderHeute();}
-function fbAbgeben(){const T=tag(today());T.geschafft=document.getElementById('fb-1').value.trim();T.gedauert=document.getElementById('fb-2').value.trim();T.abgegeben=true;editFb=false;save();render();}
+function paketeToggle(){const T=tag(curDay);T.pakete=T.pakete==='ja'?'nein':'ja';save();renderHeute();}
+function fbAbgeben(){const T=tag(curDay);T.geschafft=document.getElementById('fb-1').value.trim();T.gedauert=document.getElementById('fb-2').value.trim();T.abgegeben=true;editFb=false;save();render();}
 
 /* ================= Schritte (Projekte + Aufträge) ================= */
 function holder(id){return proj(id)||auftrag(id);}
@@ -515,7 +527,7 @@ function projDel(id){if(!confirm('Projekt endgültig löschen?'))return;S.projek
 function streak(id,from=today()){let n=0;const d=new Date(from+'T12:00:00');const check=x=>id==='__plan'?(S.tage[x]&&S.tage[x].geplant):(S.tage[x]&&S.tage[x].habits&&S.tage[x].habits[id]);
   if(!check(iso(d)))d.setDate(d.getDate()-1);/* heute noch offen zählt nicht als Bruch */
   while(check(iso(d))){n++;d.setDate(d.getDate()-1);if(n>3650)break;}return n;}
-function habitToggle(id){const T=tag(today());if(T.habits[id])delete T.habits[id];else T.habits[id]=true;save();renderHeute();renderHabits();}
+function habitToggle(id){const T=tag(curDay);if(T.habits[id])delete T.habits[id];else T.habits[id]=true;save();renderHeute();renderHabits();}
 function renderHabits(){
   const a=S.gewohnheiten.filter(g=>g.status==='aktiv'),aus=S.gewohnheiten.filter(g=>g.status!=='aktiv');
   const c=document.getElementById('g-count');c.textContent=`${a.length} / ${MAX_HABITS}`;c.classList.toggle('alarm',a.length>=MAX_HABITS);
@@ -567,7 +579,7 @@ function dayHtml(d,T,q=''){
 function renderArchiv(){
   const q=(document.getElementById('s-q').value||'').trim(),out=document.getElementById('s-out'),ql=q.toLowerCase();
   if(!q){
-    const days=Object.keys(S.tage).filter(d=>d!==today()).sort().reverse();
+    const days=Object.keys(S.tage).filter(d=>d<today()).sort().reverse();
     if(!days.length){out.innerHTML=`<div class="empty">Noch keine vergangenen Tage. Ab morgen steht hier alles.</div>`;return;}
     let cur='',html='';days.forEach(d=>{const m=d.slice(0,7);if(m!==cur){cur=m;html+=`<div class="monat">${MON[+d.slice(5,7)-1]} ${d.slice(0,4)}</div>`;}html+=dayHtml(d,S.tage[d]);});out.innerHTML=html;return;
   }
