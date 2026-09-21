@@ -126,6 +126,34 @@ mark{background:#F2E38A;color:inherit;border-radius:2px}
 .daynav button{width:44px;height:44px;border:1.5px solid var(--line);border-radius:10px;font-size:20px;font-weight:700;display:grid;place-items:center;background:var(--panel)}
 .daylbl{font-size:13px;font-weight:700;padding:3px 9px;border-radius:4px;background:var(--ink);color:var(--paper);vertical-align:middle;margin-left:8px}
 .daylbl.off{background:var(--ink2)}
+.wday{background:var(--panel);border:1.5px solid var(--line);border-radius:8px;padding:10px 12px;margin-bottom:8px}
+.wday.today{border-color:var(--ink);border-width:2.5px}
+.wday.past{opacity:.55}
+.wday .dh{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.wday .dh b{font-size:17px}
+.wday .dh .wd{color:var(--ink2);font-weight:600;font-size:14px}
+.wline{display:flex;gap:8px;align-items:flex-start;font-size:15px;margin-top:5px;line-height:1.3}
+.wline.off{color:var(--ink2)}
+.wline .tx.done{text-decoration:line-through}
+.dot{width:9px;height:9px;border-radius:50%;flex:none;margin-top:5px}
+.dot.vater{background:var(--vater)}.dot.eigen{background:var(--eigen)}.dot.privat{background:var(--privat)}
+.dot.hollow{background:none;border:2px solid var(--ink2);width:8px;height:8px}
+.mgrid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+.mhead{text-align:center;font-size:12px;font-weight:700;color:var(--ink2);padding:2px 0}
+.mcell{aspect-ratio:1;border:1.5px solid var(--line);border-radius:6px;background:var(--panel);padding:2px;display:flex;flex-direction:column;align-items:center;gap:2px;position:relative;overflow:hidden}
+.mcell.out{opacity:.3}
+.mcell.today{border-color:var(--ink);border-width:2.5px}
+.mcell.plan{background:#DCDBD2;border-color:#C2C1B6}
+.legend i.sq{width:11px;height:11px;border-radius:2px;background:#DCDBD2;border:1px solid #C2C1B6;display:block}
+.mcell .n{font-size:14px;font-weight:700;line-height:1.4}
+.mdots{display:flex;flex-wrap:wrap;gap:2px;justify-content:center;padding:0 2px}
+.mdots i{width:6px;height:6px;border-radius:50%;display:block}
+.mdots i.vater{background:var(--vater)}.mdots i.eigen{background:var(--eigen)}.mdots i.privat{background:var(--privat)}
+.pkg{position:absolute;top:3px;right:3px;width:6px;height:6px;border-radius:1px;background:var(--ink)}
+.legend{display:flex;flex-wrap:wrap;gap:12px;margin-top:10px;font-size:13px;color:var(--ink2)}
+.legend span{display:inline-flex;align-items:center;gap:5px}
+#w-kw{white-space:nowrap;font-size:26px}
+#v-woche .sub{margin:14px 0 14px}
 .pk{display:flex;align-items:center;justify-content:space-between;gap:10px;background:var(--panel);border:1.5px solid var(--line);border-radius:8px;padding:10px 14px;margin-top:12px}
 .pk.ja{border-color:var(--ink);border-width:2px}.pk.nein{opacity:.6}
 </style>
@@ -176,14 +204,28 @@ mark{background:#F2E38A;color:inherit;border-radius:2px}
 
 
 <section class="view" id="v-woche">
-  <div class="head"><h1 id="w-kw">Woche</h1></div>
-  <h2>Aufträge <span class="count">die dringendsten</span></h2>
-  <div id="h-auftraege"></div>
-  <h2>Projekte <span class="count">nächster Schritt</span></h2>
-  <div id="h-projekte"></div>
-  <details><summary>Alle Termine der Woche</summary><div id="w-termine"></div></details>
-  <h2>Letzte 14 Tage</h2>
-  <div class="form" id="w-stats"></div>
+  <div class="head"><h1 id="w-kw">Woche</h1>
+    <div class="daynav"><button onclick="calShift(-1)">‹</button><button onclick="calShift(1)">›</button></div>
+  </div>
+  <div class="sub">
+    <button data-c="woche" onclick="showCal('woche')">Woche</button>
+    <button data-c="monat" onclick="showCal('monat')">Monat</button>
+  </div>
+  <button class="link" id="w-back" onclick="calHeute()" style="display:none;margin-bottom:8px">Zurück zu heute</button>
+  <div id="w-grid"></div>
+  <div id="w-monat">
+    <h2>Dieser Monat</h2>
+    <div class="form" id="w-mstats"></div>
+  </div>
+  <div id="w-rest">
+    <h2>Aufträge <span class="count">die dringendsten</span></h2>
+    <div id="h-auftraege"></div>
+    <h2>Projekte <span class="count">nächster Schritt</span></h2>
+    <div id="h-projekte"></div>
+    <details><summary>Alle Termine der Woche</summary><div id="w-termine"></div></details>
+    <h2>Letzte 14 Tage</h2>
+    <div class="form" id="w-stats"></div>
+  </div>
 </section>
 
 <section class="view" id="v-mehr">
@@ -227,7 +269,7 @@ mark{background:#F2E38A;color:inherit;border-radius:2px}
   <button class="on" data-v="heute" onclick="show('heute')"><span class="ico">▣</span>Heute</button>
   <button data-v="projekte" onclick="show('projekte')"><span class="ico">◆</span>Projekte</button>
   <button data-v="auftraege" onclick="show('auftraege')"><span class="ico">≡</span>Aufträge</button>
-  <button data-v="woche" onclick="show('woche')"><span class="ico">▦</span>Woche</button>
+  <button data-v="woche" onclick="show('woche')"><span class="ico">▦</span>Kalender</button>
   <button data-v="mehr" onclick="show('mehr')"><span class="ico">⋯</span>Mehr</button>
 </nav>
 <button class="fab" onclick="openQuick()" aria-label="Schnell erfassen">+</button>
@@ -252,6 +294,11 @@ const emptySlots=()=>Object.fromEntries(SLOTS.map(([k,b])=>[k,emptyTask(b)]));
 let S=load(), expanded=new Set(), editPlan=false, editFb=false, curDay=today();
 function dayShift(n){const d=new Date(curDay+'T12:00:00');d.setDate(d.getDate()+n);dayGo(iso(d));}
 function dayGo(d){curDay=d;editPlan=false;editFb=false;window.scrollTo(0,0);renderHeute();}
+let calMode='woche', calAnchor=today();
+function showCal(m){calMode=m;renderWoche();}
+function calShift(n){const a=new Date(calAnchor+'T12:00:00');if(calMode==='woche')a.setDate(a.getDate()+n*7);else a.setMonth(a.getMonth()+n,1);calAnchor=iso(a);renderWoche();window.scrollTo(0,0);}
+function calHeute(){calAnchor=today();renderWoche();window.scrollTo(0,0);}
+function calOpen(d){dayGo(d);show('heute');}
 function dayLabel(d){const t=today();const diff=Math.round((new Date(d+'T12:00:00')-new Date(t+'T12:00:00'))/864e5);return diff===0?'Heute':diff===1?'Morgen':diff===-1?'Gestern':diff>1?`in ${diff} Tagen`:`vor ${-diff} Tagen`;}
 
 function load(){
@@ -542,11 +589,59 @@ function habitDel(id){if(!confirm('Gewohnheit samt Verlauf löschen?'))return;S.
 
 /* ================= WOCHE ================= */
 function kw(d){const x=new Date(d);x.setHours(0,0,0,0);x.setDate(x.getDate()+3-((x.getDay()+6)%7));const w1=new Date(x.getFullYear(),0,4);return 1+Math.round(((x-w1)/864e5-3+((w1.getDay()+6)%7))/7);}
+function monday(d){const x=new Date(d+'T12:00:00');x.setDate(x.getDate()-((x.getDay()+6)%7));return iso(x);}
+function terminDots(d){const a=S.auftraege.filter(x=>x.termin===d);return a;}
+function wdayCard(d){
+  const T=S.tage[d],t=today(),dd=new Date(d+'T12:00:00'),auf=terminDots(d).sort((a,b)=>a.status<b.status?-1:1);
+  const ts=T?SLOTS.filter(x=>T.slots[x[0]].text):[];
+  const lines=auf.map(a=>`<div class="wline ${a.status==='fertig'?'off':''}"><span class="dot ${a.bereich}"></span><span class="tx ${a.status==='fertig'?'done':''}">${esc(a.name)}</span></div>`)
+    .concat(ts.map(([k,b])=>{const x=T.slots[k];return `<div class="wline"><span class="dot hollow"></span><span class="tx ${x.done?'done':''}">${esc(x.text)}</span></div>`;}));
+  return `<div class="wday ${d===t?'today':''} ${d<t?'past':''}" onclick="calOpen('${d}')">
+    <div class="dh"><b>${WT[dd.getDay()].slice(0,2)} ${dd.getDate()}.${dd.getMonth()+1}.</b><span class="wd">${d===t?'Heute':T&&T.geplant?'geplant':''}${T&&T.pakete==='ja'?' · 📦':''}</span></div>
+    ${T&&T.termine?`<div class="wline"><span class="dot hollow" style="border:0;background:none"></span><span class="tx" style="white-space:pre-wrap">🕒 ${esc(T.termine)}</span></div>`:''}
+    ${lines.length?lines.join(''):`<div class="wline off"><span class="tx">—</span></div>`}</div>`;
+}
+function renderKalGrid(){
+  const g=document.getElementById('w-grid'),t=today();
+  document.getElementById('w-back').style.display=(calMode==='woche'?monday(calAnchor)!==monday(t):calAnchor.slice(0,7)!==t.slice(0,7))?'inline-flex':'none';
+  document.querySelectorAll('#v-woche .sub button').forEach(b=>b.classList.toggle('on',b.dataset.c===calMode));
+  document.getElementById('w-rest').style.display=calMode==='woche'?'':'none';
+  document.getElementById('w-monat').style.display=calMode==='monat'?'':'none';
+  if(calMode==='woche'){
+    const mo=monday(calAnchor);const days=[...Array(7)].map((_,i)=>{const x=new Date(mo+'T12:00:00');x.setDate(x.getDate()+i);return iso(x);});
+    document.getElementById('w-kw').textContent=`KW ${kw(new Date(mo+'T12:00:00'))}`;
+    g.innerHTML=days.map(wdayCard).join('')+`<div class="legend"><span><i class="dot vater"></i>Auftrag Vater</span><span><i class="dot eigen"></i>Auftrag Eigenes</span><span><i class="dot hollow"></i>Aufgabe</span><span>📦 Paketabgabe</span></div>`;
+    return;
+  }
+  const a=new Date(calAnchor+'T12:00:00'),y=a.getFullYear(),m=a.getMonth();
+  document.getElementById('w-kw').textContent=`${MON[m]} ${y}`;
+  const off=(new Date(y,m,1).getDay()+6)%7;const cells=[];
+  for(let i=0;i<42;i++){const x=new Date(y,m,1-off+i);cells.push({d:iso(x),out:x.getMonth()!==m,n:x.getDate()});}
+  while(cells.length>35&&cells.slice(-7).every(c=>c.out))cells.length-=7;
+  g.innerHTML=`<div class="mgrid">${['M','D','M','D','F','S','S'].map(x=>`<div class="mhead">${x}</div>`).join('')}
+    ${cells.map(c=>{const T=S.tage[c.d],auf=terminDots(c.d);
+      const dots=auf.slice(0,6).map(x=>`<i class="${x.bereich}"></i>`).join('');
+      return `<div class="mcell ${c.out?'out':''} ${c.d===t?'today':''} ${T&&T.geplant?'plan':''}" onclick="calOpen('${c.d}')"><span class="n">${c.n}</span><div class="mdots">${dots}</div>${T&&T.pakete==='ja'?'<span class="pkg"></span>':''}</div>`;}).join('')}</div>
+    <div class="legend"><span><i class="dot vater"></i>Auftrag Vater</span><span><i class="dot eigen"></i>Auftrag Eigenes</span><span><i class="sq"></i>Tag geplant</span><span><i class="pkg" style="position:static"></i>Paketabgabe</span></div>`;
+  /* Monatsbilanz */
+  let v=0,e=0,pv=0,gp=0,pk=0,tage=0;
+  cells.filter(c=>!c.out).forEach(c=>{const T=S.tage[c.d];if(!T)return;tage++;if(T.geplant)gp++;if(T.pakete==='ja')pk++;
+    tasks(T).forEach(x=>{if(x.done){if(x.bereich==='privat')pv++;else x.bereich==='vater'?v++:e++;}});});
+  const inM=d=>d&&d.slice(0,7)===`${y}-${String(m+1).padStart(2,'0')}`;
+  const af=S.auftraege.filter(x=>x.status==='fertig'&&inM(x.erledigtAm));af.forEach(x=>x.bereich==='vater'?v++:e++);
+  const tot=v+e||1,tageImMonat=cells.filter(c=>!c.out).length;
+  document.getElementById('w-mstats').innerHTML=`<div class="row" style="justify-content:space-between"><span><span class="tag vater">Vater</span> ${v}</span><span>${e} <span class="tag eigen">Eigenes</span></span></div>
+    <div class="bar"><i class="v" style="width:${v/tot*100}%"></i><i class="e" style="width:${e/tot*100}%"></i></div>
+    <div class="kv"><span>Tage mit Plan</span><b>${gp} / ${tageImMonat}</b></div>
+    <div class="kv"><span>Aufträge fertig</span><b>${af.length}</b></div>
+    <div class="kv"><span>Paketabgaben</span><b>${pk}</b></div>
+    <div class="kv"><span>Privat erledigt</span><b>${pv}</b></div>`;
+}
 function renderWoche(){
-  const now=new Date();document.getElementById('w-kw').textContent=`KW ${kw(now)}`;
+  const now=new Date();renderKalGrid();
   const wp=p=>{const ns=nextStep(p);return `<div class="zettel ${p.bereich}"><div class="t">${esc(p.name)}</div><div class="prev">${ns?`Als nächstes: <b>${esc(ns.text)}</b>`:'<span style="color:var(--alarm)">Kein offener Schritt — eintragen.</span>'}</div><div class="prev">${offene(p.schritte).length} offen</div></div>`;};
   const wpEl=document.getElementById('w-projekte');if(wpEl)wpEl.innerHTML='';
-  const mo=new Date(now);mo.setDate(now.getDate()-((now.getDay()+6)%7));const so=new Date(mo);so.setDate(mo.getDate()+6);
+  const mo=new Date(monday(calAnchor)+'T12:00:00');const so=new Date(mo);so.setDate(mo.getDate()+6);
   const inWeek=S.auftraege.filter(x=>x.status==='offen'&&x.termin&&x.termin>=iso(mo)&&x.termin<=iso(so)).sort(byTermin),over=S.auftraege.filter(x=>x.status==='offen'&&x.termin&&x.termin<iso(mo));
   const all=over.concat(inWeek);document.getElementById('w-termine').innerHTML=all.length?all.map(x=>auftragZettel(x,true)).join(''):`<div class="empty">Keine Termine diese Woche.</div>`;
   let v=0,e=0,pv=0,laenger=0,geplant=0,pk=0;const hits={};
@@ -594,7 +689,7 @@ function renderArchiv(){
 function exportJson(){const b=new Blob([JSON.stringify(S,null,1)],{type:'application/json'});const u=URL.createObjectURL(b);const a=document.createElement('a');a.href=u;a.download=`tagwerk-${today()}.json`;a.click();setTimeout(()=>URL.revokeObjectURL(u),1000);}
 function importJson(inp){const f=inp.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{const d=JSON.parse(r.result);if(!d.projekte||!d.tage)throw 0;if(!confirm('Vorhandene Daten mit der Sicherung überschreiben?'))return;localStorage.setItem(KEY,JSON.stringify(d));S=load();save();render();}catch(e){alert('Datei nicht lesbar.');}};r.readAsText(f);inp.value='';}
 
-render();showMehr('privat');show('heute');
+render();showMehr('privat');showCal('woche');show('heute');
 </script>
 </body>
 </html>
